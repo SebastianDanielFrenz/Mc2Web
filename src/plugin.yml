@@ -1,0 +1,12 @@
+name: Mc2Web
+version: 0.0.1_01
+author: CrashGamesCrMc
+main: io.github.SebastianDanielFrenz.Mc2Web.Mc2WebPlugin
+description: A web interface for Minecraft.
+depend:
+- Vault
+softdepend:
+- StockMarket
+commands:
+   mc2web:
+      description: the main command for mc2web.
