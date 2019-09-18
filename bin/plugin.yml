@@ -1,7 +1,7 @@
 name: Mc2Web
-version: 0.0.1_01
+version: 0.0.2_02
 author: CrashGamesCrMc
-main: io.github.SebastianDanielFrenz.Mc2Web.Mc2WebPlugin
+main: io.github.SebastianDanielFrenz.Mc2Web.Mc2Web
 description: A web interface for Minecraft.
 depend:
 - Vault
