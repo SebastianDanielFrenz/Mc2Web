@@ -9,27 +9,49 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sun.net.httpserver.HttpServer;
 
+import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerAlreadyRunningException;
+import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerNotRunningException;
 import net.milkbowl.vault.economy.Economy;
 
 public class Mc2Web extends JavaPlugin {
 
-	HttpServer server;
+	public static HttpServer server;
 
 	public static Mc2Web plugin;
 	public static Economy economy;
+
+	public static void startWebServer() throws IOException, WebServerAlreadyRunningException {
+		if (server != null) {
+			throw new WebServerAlreadyRunningException();
+		}
+		server = HttpServer.create(new InetSocketAddress(plugin.getConfig().getInt(cPORT)), 0);
+	}
+
+	public static void stopWebServer() throws WebServerNotRunningException {
+		if (server != null) {
+			server.stop(0);
+			server = null;
+		} else {
+			throw new WebServerNotRunningException();
+		}
+	}
 
 	@Override
 	public void onEnable() {
 		plugin = this;
 
 		loadConfiguration();
-		
+
 		if (!setupEconomey()) {
 			Bukkit.shutdown();
 		}
 
 		try {
-			server = HttpServer.create(new InetSocketAddress(getConfig().getInt(cPORT)), 0);
+			try {
+				startWebServer();
+			} catch (WebServerAlreadyRunningException e) {
+				e.printStackTrace();
+			}
 
 			System.out.println("server started at " + getConfig().getInt(cPORT));
 
@@ -48,11 +70,13 @@ public class Mc2Web extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		if (server != null) {
-			server.stop(0);
+		try {
+			stopWebServer();
+		} catch (WebServerNotRunningException e) {
+			e.printStackTrace();
 		}
 	}
-	
+
 	private boolean setupEconomey() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager()
 				.getRegistration(Economy.class);
