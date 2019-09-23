@@ -121,13 +121,13 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 				if (hasPermission(sender, permission_restart)) {
 					try {
 						Mc2Web.stopWebServer();
-						sender.sendMessage(msg_server_stopped);
+						sender.sendMessage(prefix + msg_server_stopped);
 					} catch (WebServerNotRunningException e) {
 						sender.sendMessage(prefix + error_web_server_not_running);
 					}
 					try {
 						Mc2Web.startWebServer();
-						sender.sendMessage(msg_server_started);
+						sender.sendMessage(prefix + msg_server_started);
 					} catch (IOException | WebServerAlreadyRunningException e) {
 						e.printStackTrace();
 						sender.sendMessage(prefix + error_internal + " The server failed to start!");
