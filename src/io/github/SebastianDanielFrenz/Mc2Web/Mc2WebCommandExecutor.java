@@ -32,6 +32,7 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 			+ " and the new web server. Shutting down the server would not work properly,"
 			+ " because it would wait for all threads to close. You would have to force the shuttdown.";
 	public static final String error_web_server_not_running = "§4The web server is not running!";
+	public static final String error_command_not_found = "§4Command not found!";
 
 	public static final String msg_server_started = "§aServer started!";
 	public static final String msg_server_stopped = "§aServer stopped!";
@@ -138,6 +139,8 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 					Mc2Web.plugin.reloadConfig();
 					sender.sendMessage(prefix + "Config reloaded!");
 				}
+			} else {
+				sender.sendMessage(prefix + error_command_not_found);
 			}
 		}
 

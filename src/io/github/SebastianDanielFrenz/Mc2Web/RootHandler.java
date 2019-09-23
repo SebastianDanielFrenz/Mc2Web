@@ -11,8 +11,40 @@ import com.sun.net.httpserver.HttpHandler;
 public class RootHandler implements HttpHandler {
 
 	public static boolean Test(String file) {
-		return Files.isRegularFile(Paths.get(file));
+		return (Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP) && file.contains("//"))
+				? Files.isRegularFile(Paths.get(file)) : Files.isRegularFile(Paths.get("plugins/Mc2Web/" + file));
 	}
+
+	public static void defaultHandler(String url, OutputStream os, HttpExchange he) {
+		try {
+			byte[] response = Files.readAllBytes(Paths
+					.get((Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP) && url.contains("//"))
+							? url : "plugins/Mc2Web/" + url));
+			he.sendResponseHeaders(200, response.length);
+			os.write(response);
+
+		} catch (Exception e) {
+			String response;
+
+			try {
+				if (Test("404")) {
+					response = Utils.processFile("404");
+				} else if (Test("404.html")) {
+					response = Utils.processFile("404.html");
+				} else {
+					response = "<html><head><title>ERROR</title></head><body><h1>The 404 page does not exist!"
+							+ " Please notify the server owner that the plugin is broken.</h1><br><br>"
+							+ "<h3>Failed while attempting to get URL: " + url + "</body></html>";
+				}
+				he.sendResponseHeaders(200, response.length());
+				os.write(response.getBytes());
+			} catch (IOException e1) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static final String CT = "Content-Type";
 
 	@Override
 	public void handle(HttpExchange he) throws IOException {
@@ -34,7 +66,7 @@ public class RootHandler implements HttpHandler {
 			he.sendResponseHeaders(200, response.length());
 			os.write(response.getBytes());
 		} else {
-			if (!url.endsWith(".png")) {
+			if (!url.contains(".") || url.endsWith(".html")) {
 				String response;
 
 				if (url.equals("")) {
@@ -58,28 +90,32 @@ public class RootHandler implements HttpHandler {
 				}
 				he.sendResponseHeaders(200, response.length());
 				os.write(response.getBytes());
+			} else if (url.endsWith(".js")) {
+				he.getResponseHeaders().set(CT, "application/javascript");
+				defaultHandler(url, os, he);
+			} else if (url.endsWith(".png")) {
+				he.getResponseHeaders().set(CT, "image/png");
+				defaultHandler(url, os, he);
+			} else if (url.endsWith(".7z")) {
+				he.getResponseHeaders().set(CT, "application/x-7z-compressed");
+				defaultHandler(url, os, he);
+			} else if (url.endsWith(".pdf")) {
+				he.getResponseHeaders().set(CT, "application/pdf");
+				defaultHandler(url, os, he);
+			} else if (url.endsWith(".aac")) {
+				he.getResponseHeaders().set(CT, "audio/x-aac");
+				defaultHandler(url, os, he);
+			} else if (url.endsWith(".apk")) {
+				he.getResponseHeaders().set(CT, "application/vnd.android.package-archive");
+				defaultHandler(url, os, he);
+			} else if (url.endsWith(".s")) {
+				he.getResponseHeaders().set(CT, "text/x-asm");
+				defaultHandler(url, os, he);
+			} else if (url.endsWith(".csv")) {
+				he.getResponseHeaders().set(CT, "text/csv");
+				defaultHandler(url, os, he);
 			} else {
-				he.getResponseHeaders().set("Content-Type", "image/png");
-				try {
-					byte[] response = Files.readAllBytes(Paths.get(url));
-					he.sendResponseHeaders(200, response.length);
-					os.write(response);
-
-				} catch (Exception e) {
-					String response;
-
-					if (Test("404")) {
-						response = Utils.processFile("404");
-					} else if (Test("404.html")) {
-						response = Utils.processFile("404.html");
-					} else {
-						response = "<html><head><title>ERROR</title></head><body><h1>The 404 page does not exist!"
-								+ " Please notify the server owner that the plugin is broken.</h1><br><br>"
-								+ "<h3>Failed while attempting to get URL: " + url + "</body></html>";
-					}
-					he.sendResponseHeaders(200, response.length());
-					os.write(response.getBytes());
-				}
+				defaultHandler(url, os, he);
 			}
 		}
 

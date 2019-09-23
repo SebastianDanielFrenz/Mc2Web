@@ -103,7 +103,9 @@ public class Utils {
 	}
 
 	public static String processFile(String filepath) throws IOException {
-		return insertVariables(new String(Files.readAllBytes(Paths.get(filepath))));
+		return insertVariables(new String(Files.readAllBytes(Paths
+				.get((Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP) && filepath.contains("//"))
+						? filepath : "plugins/Mc2Web/" + filepath))));
 	}
 
 	public static void parseQuery(String query, Map<String, Object> parameters) throws UnsupportedEncodingException {
