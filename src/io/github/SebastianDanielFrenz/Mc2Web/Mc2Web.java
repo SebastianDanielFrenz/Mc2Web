@@ -23,16 +23,21 @@ public class Mc2Web extends JavaPlugin {
 	public static void startWebServer() throws IOException, WebServerAlreadyRunningException {
 		if (server != null) {
 			throw new WebServerAlreadyRunningException();
+		} else {
+			server = HttpServer.create(new InetSocketAddress(plugin.getConfig().getInt(cPORT)), 0);
+			server.createContext("/", new RootHandler());
+			server.setExecutor(null);
+			server.start();
 		}
-		server = HttpServer.create(new InetSocketAddress(plugin.getConfig().getInt(cPORT)), 0);
+
 	}
 
 	public static void stopWebServer() throws WebServerNotRunningException {
-		if (server != null) {
+		if (server == null) {
+			throw new WebServerNotRunningException();
+		} else {
 			server.stop(0);
 			server = null;
-		} else {
-			throw new WebServerNotRunningException();
 		}
 	}
 
@@ -46,6 +51,8 @@ public class Mc2Web extends JavaPlugin {
 			Bukkit.shutdown();
 		}
 
+		getCommand("mc2web").setExecutor(new Mc2WebCommandExecutor());
+
 		try {
 			try {
 				startWebServer();
@@ -54,12 +61,6 @@ public class Mc2Web extends JavaPlugin {
 			}
 
 			System.out.println("server started at " + getConfig().getInt(cPORT));
-
-			server.createContext("/", new RootHandler());
-
-			server.setExecutor(null);
-
-			server.start();
 
 		} catch (IOException e) {
 			e.printStackTrace();
