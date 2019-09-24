@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,6 +18,7 @@ import com.youtube.crash_games_cr_mc.simpleDB.expandable.FullValueManager;
 import com.youtube.crash_games_cr_mc.simpleDB.query.Comparor;
 import com.youtube.crash_games_cr_mc.simpleDB.query.DataBaseQuery;
 import com.youtube.crash_games_cr_mc.simpleDB.query.DefaultDataBaseQuery;
+import com.youtube.crash_games_cr_mc.simpleDB.query.QueryResult;
 import com.youtube.crash_games_cr_mc.simpleDB.query.SearchedValue;
 import com.youtube.crash_games_cr_mc.simpleDB.varTypes.DBString;
 
@@ -61,7 +63,7 @@ public class Mc2Web extends JavaPlugin {
 		plugin = this;
 
 		loadConfiguration();
-		
+
 		loadDBs();
 
 		if (!setupEconomey()) {
@@ -175,10 +177,16 @@ public class Mc2Web extends JavaPlugin {
 
 	public static final String[] M_GETPASSWORD_COLUMNS = new String[] { "password" };
 	public static final String[] M_DOESUSEREXIST_COLUMNS = new String[] {};
+	public static final String[] M_UPDATEPLAYERUUID_COLUMNS = new String[] { "UUID", "user" };
 
 	public static boolean doesUserExist(String user) {
 		return query.Run("accounts", "users", M_DOESUSEREXIST_COLUMNS,
 				new SearchedValue[] { new SearchedValue("user", new DBString(user)) }).rows.size() > 0;
+	}
+
+	public static boolean doesUserExist(UUID uuid) {
+		return query.Run("accounts", "users", M_DOESUSEREXIST_COLUMNS,
+				new SearchedValue[] { new SearchedValue("uuid", new DBString(uuid.toString())) }).rows.size() > 0;
 	}
 
 	public static String getPassword(String user) {
@@ -191,6 +199,22 @@ public class Mc2Web extends JavaPlugin {
 				new SearchedValue[] { new SearchedValue("user", new DBString(user)),
 						new SearchedValue("password", new DBString(password)),
 						new SearchedValue("uuid", new DBString(uuid.toString())) });
+	}
+
+	public static void updatePlayerUUID(Player player) {
+		QueryResult result = query.Run("accounts", "users", M_UPDATEPLAYERUUID_COLUMNS,
+				new SearchedValue[] { new SearchedValue("uuid", new DBString(player.getUniqueId().toString())) });
+		if (result.rows.size() > 0) {
+			String user = ((DBString) result.rows.get(0).get(1)).getValue();
+
+			if (!player.getName().equals(user)) {
+				query.Update("accounts", "users",
+						new SearchedValue[] {
+								new SearchedValue("uuid", new DBString(player.getUniqueId().toString())) },
+						new SearchedValue[] { new SearchedValue("user", new DBString(player.getName())) });
+			}
+
+		}
 	}
 
 }
