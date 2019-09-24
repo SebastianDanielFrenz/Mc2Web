@@ -12,14 +12,14 @@ public class RootHandler implements HttpHandler {
 
 	public static boolean Test(String file) {
 		return (Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP) && file.contains("//"))
-				? Files.isRegularFile(Paths.get(file)) : Files.isRegularFile(Paths.get("plugins/Mc2Web/" + file));
+				? Files.isRegularFile(Paths.get(file)) : Files.isRegularFile(Paths.get("plugins/Mc2Web/web/" + file));
 	}
 
 	public static void defaultHandler(String url, OutputStream os, HttpExchange he) {
 		try {
 			byte[] response = Files.readAllBytes(Paths
 					.get((Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP) && url.contains("//"))
-							? url : "plugins/Mc2Web/" + url));
+							? url : "plugins/Mc2Web/web/" + url));
 			he.sendResponseHeaders(200, response.length);
 			os.write(response);
 
