@@ -3,6 +3,8 @@ package io.github.SebastianDanielFrenz.Mc2Web;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -63,6 +65,12 @@ public class Mc2Web extends JavaPlugin {
 		plugin = this;
 
 		loadConfiguration();
+
+		try {
+			Files.createDirectories(Paths.get(getConfig().getString(cDATABASE_PATH)));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 
 		loadDBs();
 
@@ -132,11 +140,15 @@ public class Mc2Web extends JavaPlugin {
 		dbh = new DataBaseHandler(new FullValueManager());
 		try {
 			dbh.addDataBase(cDATABASE_PATH + "accounts.db");
-		} catch (IOException e1) {
+		} catch (IOException | ArrayIndexOutOfBoundsException e1) {
 			e1.printStackTrace();
 			dbh.createDataBase("accounts");
+
 			DataBase accounts = dbh.getDataBase("accounts");
-			Table users = new Table(dbh.getValueManager());
+			accounts.createTable("users");
+
+			Table users = accounts.getTable("users");
+
 			users.addColumn("user");
 			users.addColumn("password");
 			users.addColumn("UUID");
@@ -198,19 +210,19 @@ public class Mc2Web extends JavaPlugin {
 		query.Insert("accounts", "users",
 				new SearchedValue[] { new SearchedValue("user", new DBString(user)),
 						new SearchedValue("password", new DBString(password)),
-						new SearchedValue("uuid", new DBString(uuid.toString())) });
+						new SearchedValue("UUID", new DBString(uuid.toString())) });
 	}
 
 	public static void updatePlayerUUID(Player player) {
 		QueryResult result = query.Run("accounts", "users", M_UPDATEPLAYERUUID_COLUMNS,
-				new SearchedValue[] { new SearchedValue("uuid", new DBString(player.getUniqueId().toString())) });
+				new SearchedValue[] { new SearchedValue("UUID", new DBString(player.getUniqueId().toString())) });
 		if (result.rows.size() > 0) {
 			String user = ((DBString) result.rows.get(0).get(1)).getValue();
 
 			if (!player.getName().equals(user)) {
 				query.Update("accounts", "users",
 						new SearchedValue[] {
-								new SearchedValue("uuid", new DBString(player.getUniqueId().toString())) },
+								new SearchedValue("UUID", new DBString(player.getUniqueId().toString())) },
 						new SearchedValue[] { new SearchedValue("user", new DBString(player.getName())) });
 			}
 
