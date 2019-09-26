@@ -1,11 +1,21 @@
 package io.github.SebastianDanielFrenz.Mc2Web;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -13,6 +23,9 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsParameters;
+import com.sun.net.httpserver.HttpsServer;
 import com.youtube.crash_games_cr_mc.simpleDB.DataBase;
 import com.youtube.crash_games_cr_mc.simpleDB.DataBaseHandler;
 import com.youtube.crash_games_cr_mc.simpleDB.Table;
@@ -31,7 +44,7 @@ import net.milkbowl.vault.economy.Economy;
 
 public class Mc2Web extends JavaPlugin {
 
-	public static HttpServer server;
+	public static HttpsServer server;
 
 	public static Mc2Web plugin;
 	public static Economy economy;
@@ -44,10 +57,52 @@ public class Mc2Web extends JavaPlugin {
 		if (server != null) {
 			throw new WebServerAlreadyRunningException();
 		} else {
-			server = HttpServer.create(new InetSocketAddress(plugin.getConfig().getInt(cPORT)), 0);
-			server.createContext("/", new RootHandler());
-			server.setExecutor(null);
-			server.start();
+			try {
+				server = HttpsServer.create(new InetSocketAddress(plugin.getConfig().getInt(cPORT)), 0);
+				SSLContext sslContext = SSLContext.getInstance("TLS");
+
+				// initialise the keystore
+				char[] password = "password".toCharArray();
+				KeyStore ks = KeyStore.getInstance("JKS");
+				FileInputStream fis = new FileInputStream("testkey.jks");
+				ks.load(fis, password);
+
+				// setup the key manager factory
+				KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+				kmf.init(ks, password);
+
+				// setup the trust manager factory
+				TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+				tmf.init(ks);
+
+				// setup the HTTPS context and parameters
+				sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+				server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+					public void configure(HttpsParameters params) {
+						try {
+							// initialise the SSL context
+							SSLContext context = getSSLContext();
+							SSLEngine engine = context.createSSLEngine();
+							params.setNeedClientAuth(false);
+							params.setCipherSuites(engine.getEnabledCipherSuites());
+							params.setProtocols(engine.getEnabledProtocols());
+
+							// Set the SSL parameters
+							SSLParameters sslParameters = context.getSupportedSSLParameters();
+							params.setSSLParameters(sslParameters);
+
+						} catch (Exception ex) {
+							System.out.println("Failed to create HTTPS port");
+						}
+					}
+				});
+				server.createContext("/", new RootHandler());
+				server.setExecutor(null);
+				server.start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 	}
