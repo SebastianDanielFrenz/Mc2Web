@@ -139,9 +139,8 @@ public class Mc2Web extends JavaPlugin {
 	public void loadDBs() {
 		dbh = new DataBaseHandler(new FullValueManager());
 		try {
-			dbh.addDataBase(cDATABASE_PATH + "accounts.db");
+			dbh.addDataBase(getConfig().getString(cDATABASE_PATH) + "accounts.db");
 		} catch (IOException | ArrayIndexOutOfBoundsException e1) {
-			e1.printStackTrace();
 			dbh.createDataBase("accounts");
 
 			DataBase accounts = dbh.getDataBase("accounts");
@@ -155,7 +154,7 @@ public class Mc2Web extends JavaPlugin {
 
 			accounts.addTable("users", users);
 			try {
-				dbh.saveDataBase("accounts", cDATABASE_PATH + "accounts.db");
+				dbh.saveDataBase("accounts", getConfig().getString(cDATABASE_PATH) + "accounts.db");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -167,7 +166,8 @@ public class Mc2Web extends JavaPlugin {
 	public void saveDBs() {
 		for (String db : dbh.getDBnames()) {
 			try {
-				dbh.saveDataBase(db, cDATABASE_PATH + "accounts.db");
+				dbh.saveDataBase(db, getConfig().getString(cDATABASE_PATH) + "accounts.db");
+				getLogger().info("Saved database accounts.db");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
