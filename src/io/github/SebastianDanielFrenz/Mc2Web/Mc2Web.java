@@ -24,6 +24,7 @@ import com.youtube.crash_games_cr_mc.simpleDB.query.QueryResult;
 import com.youtube.crash_games_cr_mc.simpleDB.query.SearchedValue;
 import com.youtube.crash_games_cr_mc.simpleDB.varTypes.DBString;
 
+import io.github.SebastianDanielFrenz.Mc2Web.autosave.AutoSaveDBThread;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerAlreadyRunningException;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerNotRunningException;
 import net.milkbowl.vault.economy.Economy;
@@ -73,6 +74,10 @@ public class Mc2Web extends JavaPlugin {
 		}
 
 		loadDBs();
+
+		if (getConfig().getBoolean(cAUTOSAVE_ENABLED)) {
+			new Thread(new AutoSaveDBThread()).start();
+		}
 
 		if (!setupEconomey()) {
 			Bukkit.shutdown();
@@ -124,6 +129,11 @@ public class Mc2Web extends JavaPlugin {
 		getConfig().addDefault(cWEB_PATH, "plugins/Mc2Web/web/");
 		getConfig().addDefault(cDATABASE_PATH, "plugins/Mc2Web/db/");
 
+		getConfig().addDefault(cDEBUG, false);
+
+		getConfig().addDefault(cAUTOSAVE_ENABLED, true);
+		getConfig().addDefault(cAUTOSAVE_FREQUENCY, 1.0);
+
 		getConfig().addDefault(cSECURITY_BLOCK_FOLDER_UP, true);
 
 		getConfig().addDefault(cDYNMAP_PORT, 8123);
@@ -136,10 +146,10 @@ public class Mc2Web extends JavaPlugin {
 		saveConfig();
 	}
 
-	public void loadDBs() {
+	public static void loadDBs() {
 		dbh = new DataBaseHandler(new FullValueManager());
 		try {
-			dbh.addDataBase(getConfig().getString(cDATABASE_PATH) + "accounts.db");
+			dbh.addDataBase(Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "accounts.db");
 		} catch (IOException | ArrayIndexOutOfBoundsException e1) {
 			dbh.createDataBase("accounts");
 
@@ -154,7 +164,7 @@ public class Mc2Web extends JavaPlugin {
 
 			accounts.addTable("users", users);
 			try {
-				dbh.saveDataBase("accounts", getConfig().getString(cDATABASE_PATH) + "accounts.db");
+				dbh.saveDataBase("accounts", Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "accounts.db");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -163,11 +173,10 @@ public class Mc2Web extends JavaPlugin {
 		query = new DefaultDataBaseQuery(dbh);
 	}
 
-	public void saveDBs() {
+	public static void saveDBs() {
 		for (String db : dbh.getDBnames()) {
 			try {
-				dbh.saveDataBase(db, getConfig().getString(cDATABASE_PATH) + "accounts.db");
-				getLogger().info("Saved database accounts.db");
+				dbh.saveDataBase(db, Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "accounts.db");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -180,7 +189,12 @@ public class Mc2Web extends JavaPlugin {
 	public static final String cWEB_PATH = "web_path";
 	public static final String cDATABASE_PATH = "database_path";
 
+	public static final String cDEBUG = "debug";
+
 	public static final String cSECURITY_BLOCK_FOLDER_UP = "security.block.folder_up";
+
+	public static final String cAUTOSAVE_ENABLED = "autosave.enabled";
+	public static final String cAUTOSAVE_FREQUENCY = "autosave.frequency";
 
 	public static final String cDYNMAP_PORT = "dynmap.port";
 	public static final String cDYNMAP_ENABLED = "dynmap.enabled";
