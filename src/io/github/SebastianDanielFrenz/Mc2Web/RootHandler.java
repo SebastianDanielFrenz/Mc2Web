@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Random;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -56,8 +57,18 @@ public class RootHandler implements HttpHandler {
 
 		if (url.equals("cookie")) {
 			String response = "";
+			response += "cookie: (";
+
+			for (String arg : he.getRequestHeaders().getOrDefault("Cookie", new ArrayList<String>())) {
+				response += arg + ", ";
+			}
+			response += ")";
+
 			Random random = new Random();
-			he.getResponseHeaders().set("Set-Cookie", String.valueOf(random.nextLong()));
+
+			he.getResponseHeaders().set("Set-Cookie", "sessionID=" + String.valueOf(random.nextLong()));
+			he.sendResponseHeaders(200, response.length());
+			os.write(response.getBytes());
 		}
 
 		if (url.contains("//") && Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP)) {
