@@ -5,10 +5,13 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.List;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
+import io.github.SebastianDanielFrenz.Mc2Web.cookie.Cookie;
+import io.github.SebastianDanielFrenz.Mc2Web.cookie.CookieStorage;
 
 public class RootHandler implements HttpHandler {
 
@@ -55,19 +58,36 @@ public class RootHandler implements HttpHandler {
 
 		OutputStream os = he.getResponseBody();
 
+		Cookie cookie;
+		List<String> cookieArgs = he.getRequestHeaders().getOrDefault("Cookie", new ArrayList<String>());
+		for (String arg : cookieArgs) {
+			System.out.println("cookieArg: " + arg);
+		}
+
+		String cookieID;
+
+		if (cookieArgs.size() > 0) {
+			cookieID = cookieArgs.get(0).substring(3);
+			cookie = CookieStorage.getCookie(cookieID);
+		} else {
+			cookieID = CookieStorage.generateCookieID();
+			cookie = new Cookie("NULL");
+		}
+
+		he.getResponseHeaders().set("Set-Cookie", "sessionID=" + String.valueOf(cookieID));
+
 		if (url.equals("cookie")) {
 			String response = "";
-			response += "cookie: (";
+			response += "cookie: ";
 
-			for (String arg : he.getRequestHeaders().getOrDefault("Cookie", new ArrayList<String>())) {
-				response += arg + ", ";
-			}
-			response += ")";
+			response += cookieID;
+			response += "<br>user: ";
+			response += cookie.user;
+			response += "<br>last url: ";
+			response += cookie.last_url;
 
-			Random random = new Random();
-
-			he.getResponseHeaders().set("Set-Cookie", "sessionID=" + String.valueOf(random.nextLong()));
 			he.sendResponseHeaders(200, response.length());
+
 			os.write(response.getBytes());
 		}
 
@@ -138,5 +158,8 @@ public class RootHandler implements HttpHandler {
 		}
 
 		os.close();
+
+		cookie.last_url = url;
+
 	}
 }
