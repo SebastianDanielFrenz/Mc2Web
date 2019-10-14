@@ -14,7 +14,7 @@ public class CookieStorage {
 	public static final String[] M_GENERATECOOKIEID_COLUMNS = new String[] {};
 
 	public static Cookie getCookie(String ID) {
-		QueryResult result = Mc2Web.query.Run("accounts", "cookies", M_GETCOOKIE_COLUMNS,
+		QueryResult result = Mc2Web.query.Run("accounts", "users", M_GETCOOKIE_COLUMNS,
 				new SearchedValue[] { new SearchedValue("ID", new DBString(ID)) });
 		return result.rows.size() >= 1 ? new Cookie(((DBString) result.rows.get(0).get(0)).getValue()) : null;
 	}
@@ -48,7 +48,7 @@ public class CookieStorage {
 			bytes = new byte[128];
 			random.nextBytes(bytes);
 			ID = new String(bytes);
-			result = Mc2Web.query.Run("accounts", "table", M_GENERATECOOKIEID_COLUMNS,
+			result = Mc2Web.query.Run("accounts", "users", M_GENERATECOOKIEID_COLUMNS,
 					new SearchedValue[] { new SearchedValue("ID", new DBString(ID)) });
 			if (result.rows.size() == 0) {
 				break;

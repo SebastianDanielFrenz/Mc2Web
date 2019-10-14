@@ -64,31 +64,36 @@ public class RootHandler implements HttpHandler {
 			System.out.println("cookieArg: " + arg);
 		}
 
-		String cookieID;
+		try {
 
-		if (cookieArgs.size() > 0) {
-			cookieID = cookieArgs.get(0).substring(3);
-			cookie = CookieStorage.getCookie(cookieID);
-		} else {
-			cookieID = CookieStorage.generateCookieID();
-			cookie = new Cookie("NULL");
-		}
+			String cookieID;
 
-		he.getResponseHeaders().set("Set-Cookie", "sessionID=" + String.valueOf(cookieID));
+			if (cookieArgs.size() > 0) {
+				cookieID = cookieArgs.get(0).substring(3);
+				cookie = CookieStorage.getCookie(cookieID);
+			} else {
+				cookieID = CookieStorage.generateCookieID();
+				cookie = new Cookie("NULL");
+			}
 
-		if (url.equals("cookie")) {
-			String response = "";
-			response += "cookie: ";
+			he.getResponseHeaders().set("Set-Cookie", "ID=" + String.valueOf(cookieID));
 
-			response += cookieID;
-			response += "<br>user: ";
-			response += cookie.user;
-			response += "<br>last url: ";
-			response += cookie.last_url;
+			if (url.equals("cookie")) {
+				String response = "";
+				response += "cookie: ";
 
-			he.sendResponseHeaders(200, response.length());
+				response += cookieID;
+				response += "<br>user: ";
+				response += cookie.user;
+				response += "<br>last url: ";
+				response += cookie.last_url;
 
-			os.write(response.getBytes());
+				he.sendResponseHeaders(200, response.length());
+
+				os.write(response.getBytes());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		if (url.contains("//") && Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP)) {
@@ -159,7 +164,7 @@ public class RootHandler implements HttpHandler {
 
 		os.close();
 
-		cookie.last_url = url;
+		// cookie.last_url = url;
 
 	}
 }
