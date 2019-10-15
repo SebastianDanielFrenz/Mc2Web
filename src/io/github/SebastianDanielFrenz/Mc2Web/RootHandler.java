@@ -4,22 +4,27 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
+import io.github.SebastianDanielFrenz.Mc2Web.cookie.Cookie;
+import io.github.SebastianDanielFrenz.Mc2Web.cookie.CookieStorage;
 
 public class RootHandler implements HttpHandler {
 
 	public static boolean Test(String file) {
 		return (Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP) && file.contains("//"))
-				? Files.isRegularFile(Paths.get(file)) : Files.isRegularFile(Paths.get("plugins/Mc2Web/" + file));
+				? Files.isRegularFile(Paths.get(file)) : Files.isRegularFile(Paths.get("plugins/Mc2Web/web/" + file));
 	}
 
 	public static void defaultHandler(String url, OutputStream os, HttpExchange he) {
 		try {
 			byte[] response = Files.readAllBytes(Paths
 					.get((Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP) && url.contains("//"))
-							? url : "plugins/Mc2Web/" + url));
+							? url : "plugins/Mc2Web/web/" + url));
 			he.sendResponseHeaders(200, response.length);
 			os.write(response);
 
@@ -52,6 +57,44 @@ public class RootHandler implements HttpHandler {
 		String url = he.getRequestURI().toString().substring(1);
 
 		OutputStream os = he.getResponseBody();
+
+		Cookie cookie;
+		List<String> cookieArgs = he.getRequestHeaders().getOrDefault("Cookie", new ArrayList<String>());
+		for (String arg : cookieArgs) {
+			System.out.println("cookieArg: " + arg);
+		}
+
+		try {
+
+			String cookieID;
+
+			if (cookieArgs.size() > 0) {
+				cookieID = cookieArgs.get(0).substring(3);
+				cookie = CookieStorage.getCookie(cookieID);
+			} else {
+				cookieID = CookieStorage.generateCookieID();
+				cookie = new Cookie("NULL");
+			}
+
+			he.getResponseHeaders().set("Set-Cookie", "ID=" + String.valueOf(cookieID));
+
+			if (url.equals("cookie")) {
+				String response = "";
+				response += "cookie: ";
+
+				response += cookieID;
+				response += "<br>user: ";
+				response += cookie.user;
+				response += "<br>last url: ";
+				response += cookie.last_url;
+
+				he.sendResponseHeaders(200, response.length());
+
+				os.write(response.getBytes());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		if (url.contains("//") && Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP)) {
 			String response;
@@ -120,5 +163,8 @@ public class RootHandler implements HttpHandler {
 		}
 
 		os.close();
+
+		// cookie.last_url = url;
+
 	}
 }

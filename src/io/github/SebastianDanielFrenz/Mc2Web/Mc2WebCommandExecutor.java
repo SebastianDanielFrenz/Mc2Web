@@ -1,5 +1,6 @@
 package io.github.SebastianDanielFrenz.Mc2Web;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -8,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerAlreadyRunningException;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerNotRunningException;
@@ -19,6 +21,8 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 	public static final String[] permission_start = { "Mc2Web.start" };
 	public static final String[] permission_restart = { "Mc2Web.restart" };
 	public static final String[] permission_reload = { "Mc2Web.reload" };
+	public static final String[] permission_register = { "Mc2Web.register", "Mc2Web.user" };
+	public static final String[] permission_dump = { "Mc2Web.dump" };
 
 	public static final String prefix = "§f[§eMc2Web§f]: §a";
 	public static final String error_permission_denied = "§4Permission denied!";
@@ -33,9 +37,12 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 			+ " because it would wait for all threads to close. You would have to force the shuttdown.";
 	public static final String error_web_server_not_running = "§4The web server is not running!";
 	public static final String error_command_not_found = "§4Command not found!";
+	public static final String error_not_a_player = "§4You have to be a player to do this!";
+	public static final String error_not_enough_arguments = "§4Not enough arguments!";
 
 	public static final String msg_server_started = "§aServer started!";
 	public static final String msg_server_stopped = "§aServer stopped!";
+	public static final String msg_registered = "§aRegistered!";
 
 	public static boolean hasPermission(CommandSender sender, String[] perms) {
 		for (String perm : perms) {
@@ -77,9 +84,10 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 				sender.sendMessage(prefix + "/mc2web start -> starts the webserver");
 				sender.sendMessage(prefix + "/mc2web stop -> stops the webserver");
 				sender.sendMessage(prefix + "/mc2web restart -> restarts the webserver");
-				sender.sendMessage(prefix + "/mc2web permissions -> lists the permissions you have and do not have"
-						+ " (in case you have the permission to run the help command; this is for security reasons)");
 				sender.sendMessage(prefix + "/mc2web reload -> reloads the config file");
+				sender.sendMessage(prefix
+						+ "/mc2web register <password> -> registers a web account your you and sets the password");
+				sender.sendMessage(prefix + "/mc2web dump");
 			}
 		} else {
 			if (args[0].equalsIgnoreCase("start")) {
@@ -138,6 +146,30 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 				if (hasPermission(sender, permission_reload)) {
 					Mc2Web.plugin.reloadConfig();
 					sender.sendMessage(prefix + "Config reloaded!");
+				}
+			} else if (args[0].equalsIgnoreCase("register")) {
+				if (hasPermission(sender, permission_register)) {
+					if (sender instanceof Player) {
+						if (args.length >= 2) {
+							Player player = (Player) sender;
+							Mc2Web.registerUser(player.getName(), args[1], player.getUniqueId());
+							sender.sendMessage(prefix + msg_registered);
+						} else {
+							sender.sendMessage(prefix + error_not_enough_arguments);
+						}
+					} else {
+						sender.sendMessage(prefix + error_not_a_player);
+					}
+				}
+			} else if (args[0].equalsIgnoreCase("dump")) {
+				if (hasPermission(sender, permission_dump)) {
+					try {
+						Mc2Web.dbh.getDataBase("accounts").getTable("users").ToQueryResult()
+								.DumpHTMLandFormat("plugins/Mc2Web/web/users.html");
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+					sender.sendMessage(prefix + "Dumped user table to plugins/Mc2Web/web/users.html!");
 				}
 			} else {
 				sender.sendMessage(prefix + error_command_not_found);
