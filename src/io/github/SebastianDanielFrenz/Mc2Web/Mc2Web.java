@@ -80,6 +80,11 @@ public class Mc2Web extends JavaPlugin {
 		}
 
 		if (!setupEconomey()) {
+			getLogger().severe("§4Economy not found! Shutting down server.");
+			Bukkit.shutdown();
+		}
+		if (!setupDB()) {
+			getLogger().severe("§4DataBase not found! Shutting down server.");
 			Bukkit.shutdown();
 		}
 
@@ -144,6 +149,16 @@ public class Mc2Web extends JavaPlugin {
 		getConfig().options().copyDefaults(true);
 
 		saveConfig();
+	}
+
+	public boolean setupDB() {
+		RegisteredServiceProvider<DataBaseHandler> dataBaseProvider = getServer().getServicesManager()
+				.getRegistration(DataBaseHandler.class);
+		if (dataBaseProvider != null) {
+			dbh = dataBaseProvider.getProvider();
+		}
+
+		return dataBaseProvider != null;
 	}
 
 	public static void loadDBs() {
