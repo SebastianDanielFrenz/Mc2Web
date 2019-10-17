@@ -5,6 +5,7 @@ main: io.github.SebastianDanielFrenz.Mc2Web.Mc2Web
 description: A web interface for Minecraft.
 depend:
 - Vault
+- SimpleDBMT
 softdepend:
 - StockMarket
 commands:

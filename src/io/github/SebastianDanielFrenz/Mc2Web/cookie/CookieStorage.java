@@ -2,11 +2,11 @@ package io.github.SebastianDanielFrenz.Mc2Web.cookie;
 
 import java.util.Random;
 
-import com.youtube.crash_games_cr_mc.simpleDB.query.DataBaseQuery;
-import com.youtube.crash_games_cr_mc.simpleDB.query.DefaultDataBaseQuery;
-import com.youtube.crash_games_cr_mc.simpleDB.query.QueryResult;
-import com.youtube.crash_games_cr_mc.simpleDB.query.SearchedValue;
-import com.youtube.crash_games_cr_mc.simpleDB.varTypes.DBString;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.DataBaseQuery;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.DefaultDataBaseQuery;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.QueryResult;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.SearchedValue;
+import io.github.SebastianDanielFrenz.SimpleDBMT.varTypes.DBString;
 
 import io.github.SebastianDanielFrenz.Mc2Web.Mc2Web;
 
@@ -19,10 +19,8 @@ public class CookieStorage {
 	private static DataBaseQuery query = new DefaultDataBaseQuery(Mc2Web.dbh);
 
 	public static void addCookie(String cookieID, Cookie cookie) {
-		query.Insert("Mc2Web", "cookies",
-				new SearchedValue[] { new SearchedValue("ID", new DBString(cookieID)),
-						new SearchedValue("user", new DBString(cookie.user)),
-						new SearchedValue("lastURL", new DBString(cookie.last_url)) });
+		query.Insert("Mc2Web", "cookies", new SearchedValue[] { new SearchedValue("ID", new DBString(cookieID)),
+				new SearchedValue("user", new DBString(cookie.user)) });
 	}
 
 	public static int loginUser(String user, String password) {
@@ -48,18 +46,11 @@ public class CookieStorage {
 				new SearchedValue[] { new SearchedValue("user", new DBString(user)) });
 	}
 
-	public static void updateCookielastURL(String cookieID, String lastURL) {
-		query.Update("Mc2Web", "cookies", new SearchedValue[] { new SearchedValue("ID", new DBString(cookieID)) },
-				new SearchedValue[] { new SearchedValue("lastURL", new DBString("lastURL")) });
-	}
-
 	public static Cookie getCookie(String cookieID) {
-		QueryResult result = query.Run("Mc2Web", "cookies", new String[] { "user", "lastURL" },
+		QueryResult result = query.Run("Mc2Web", "cookies", new String[] { "user" },
 				new SearchedValue[] { new SearchedValue("ID", new DBString(cookieID)) });
 
-		return (result.rows.size() == 0) ? null
-				: new Cookie(((DBString) result.rows.get(0).get(0)).getValue(),
-						((DBString) result.rows.get(0).get(1)).getValue());
+		return (result.rows.size() == 0) ? null : new Cookie(((DBString) result.rows.get(0).get(0)).getValue());
 	}
 
 	public static String generateCookieID() {
@@ -71,7 +62,7 @@ public class CookieStorage {
 			bytes = new byte[128];
 			random.nextBytes(bytes);
 			ID = new String(bytes);
-			result = Mc2Web.query.Run("accounts", "cookies", new String[] {},
+			result = Mc2Web.query.Run("Mc2Web", "cookies", new String[] {},
 					new SearchedValue[] { new SearchedValue("ID", new DBString(ID)) });
 			if (result.rows.size() == 0) {
 				break;

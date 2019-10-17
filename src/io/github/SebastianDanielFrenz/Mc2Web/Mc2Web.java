@@ -13,18 +13,16 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sun.net.httpserver.HttpServer;
-import com.youtube.crash_games_cr_mc.simpleDB.DataBase;
-import com.youtube.crash_games_cr_mc.simpleDB.DataBaseHandler;
-import com.youtube.crash_games_cr_mc.simpleDB.Table;
-import com.youtube.crash_games_cr_mc.simpleDB.expandable.FullValueManager;
-import com.youtube.crash_games_cr_mc.simpleDB.query.Comparor;
-import com.youtube.crash_games_cr_mc.simpleDB.query.DataBaseQuery;
-import com.youtube.crash_games_cr_mc.simpleDB.query.DefaultDataBaseQuery;
-import com.youtube.crash_games_cr_mc.simpleDB.query.QueryResult;
-import com.youtube.crash_games_cr_mc.simpleDB.query.SearchedValue;
-import com.youtube.crash_games_cr_mc.simpleDB.varTypes.DBString;
+import io.github.SebastianDanielFrenz.SimpleDBMT.DataBase;
+import io.github.SebastianDanielFrenz.SimpleDBMT.DataBaseHandler;
+import io.github.SebastianDanielFrenz.SimpleDBMT.Table;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.Comparor;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.DataBaseQuery;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.DefaultDataBaseQuery;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.QueryResult;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.SearchedValue;
+import io.github.SebastianDanielFrenz.SimpleDBMT.varTypes.DBString;
 
-import io.github.SebastianDanielFrenz.Mc2Web.autosave.AutoSaveDBThread;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerAlreadyRunningException;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerNotRunningException;
 import net.milkbowl.vault.economy.Economy;
@@ -73,12 +71,6 @@ public class Mc2Web extends JavaPlugin {
 			e1.printStackTrace();
 		}
 
-		loadDBs();
-
-		if (getConfig().getBoolean(cAUTOSAVE_ENABLED)) {
-			new Thread(new AutoSaveDBThread()).start();
-		}
-
 		if (!setupEconomey()) {
 			getLogger().severe("§4Economy not found! Shutting down server.");
 			Bukkit.shutdown();
@@ -87,6 +79,8 @@ public class Mc2Web extends JavaPlugin {
 			getLogger().severe("§4DataBase not found! Shutting down server.");
 			Bukkit.shutdown();
 		}
+
+		prepareDBs();
 
 		getCommand("mc2web").setExecutor(new Mc2WebCommandExecutor());
 
@@ -139,9 +133,6 @@ public class Mc2Web extends JavaPlugin {
 
 		getConfig().addDefault(cDEBUG, false);
 
-		getConfig().addDefault(cAUTOSAVE_ENABLED, true);
-		getConfig().addDefault(cAUTOSAVE_FREQUENCY, 1.0);
-
 		getConfig().addDefault(cSECURITY_BLOCK_FOLDER_UP, true);
 
 		getConfig().addDefault(cDYNMAP_PORT, 8123);
@@ -164,25 +155,32 @@ public class Mc2Web extends JavaPlugin {
 		return dataBaseProvider != null;
 	}
 
-	public static void loadDBs() {
-		dbh = new DataBaseHandler(new FullValueManager());
+	public static void prepareDBs() {
 		try {
-			dbh.addDataBase(Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "accounts.db");
+			dbh.addDataBase(Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "Mc2Web.db");
 		} catch (IOException | ArrayIndexOutOfBoundsException e1) {
-			dbh.createDataBase("accounts");
+			dbh.createDataBase("Mc2Web");
 
-			DataBase accounts = dbh.getDataBase("accounts");
-			accounts.createTable("users");
+			DataBase mc2web = dbh.getDataBase("Mc2Web");
+			mc2web.createTable("users");
 
-			Table users = accounts.getTable("users");
+			Table users = mc2web.getTable("users");
 
 			users.addColumn("user");
 			users.addColumn("password");
 			users.addColumn("UUID");
 
-			accounts.addTable("users", users);
+			mc2web.addTable("users", users);
+
+			mc2web.createTable("cookies");
+
+			Table cookies = mc2web.getTable("cookies");
+
+			cookies.addColumn("ID");
+			cookies.addColumn("user");
+			cookies.addColumn("lastURL");
 			try {
-				dbh.saveDataBase("accounts", Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "accounts.db");
+				dbh.saveDataBase("Mc2Web", Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "Mc2Web.db");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
