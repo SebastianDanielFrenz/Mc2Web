@@ -134,6 +134,9 @@ public class Mc2Web extends JavaPlugin {
 		getConfig().addDefault(cWEB_PATH, "plugins/Mc2Web/web/");
 		getConfig().addDefault(cDATABASE_PATH, "plugins/Mc2Web/db/");
 
+		getConfig().addDefault(cURL_LOGIN_CHECK, "login/check");
+		getConfig().addDefault(cURL_LOGIN_FAILED, "login/failed");
+
 		getConfig().addDefault(cDEBUG, false);
 
 		getConfig().addDefault(cAUTOSAVE_ENABLED, true);
@@ -203,6 +206,9 @@ public class Mc2Web extends JavaPlugin {
 
 	public static final String cWEB_PATH = "web_path";
 	public static final String cDATABASE_PATH = "database_path";
+
+	public static final String cURL_LOGIN_CHECK = "url.login_check";
+	public static final String cURL_LOGIN_FAILED = "url.login_failed";
 
 	public static final String cDEBUG = "debug";
 
