@@ -9,6 +9,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/javaLib/spigot/Vault.jar"/>
 	<classpathentry kind="lib" path="C:/javaLib/spigot/PermissionsEx-1.23.4.jar"/>
-	<classpathentry kind="lib" path="C:/Users/crash/OneDrive/Desktop/ComputerPlugin/plugins/SimpleDBMT_2.0.0.jar"/>
+	<classpathentry kind="lib" path="C:/javaLib/SimpleDB/SimpleDBMT-2.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
