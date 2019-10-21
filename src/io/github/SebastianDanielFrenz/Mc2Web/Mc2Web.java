@@ -16,13 +16,17 @@ import com.sun.net.httpserver.HttpServer;
 import io.github.SebastianDanielFrenz.SimpleDBMT.DataBase;
 import io.github.SebastianDanielFrenz.SimpleDBMT.DataBaseHandler;
 import io.github.SebastianDanielFrenz.SimpleDBMT.Table;
+import io.github.SebastianDanielFrenz.SimpleDBMT.adapter.AdapterInfo;
+import io.github.SebastianDanielFrenz.SimpleDBMT.error.ComparorOperatorNotSupportedException;
 import io.github.SebastianDanielFrenz.SimpleDBMT.query.Comparor;
 import io.github.SebastianDanielFrenz.SimpleDBMT.query.DataBaseQuery;
+import io.github.SebastianDanielFrenz.SimpleDBMT.query.DefaultComparor;
 import io.github.SebastianDanielFrenz.SimpleDBMT.query.DefaultDataBaseQuery;
 import io.github.SebastianDanielFrenz.SimpleDBMT.query.QueryResult;
 import io.github.SebastianDanielFrenz.SimpleDBMT.query.SearchedValue;
 import io.github.SebastianDanielFrenz.SimpleDBMT.varTypes.DBString;
-
+import io.github.SebastianDanielFrenz.SimpleDBMT.varTypes.DBVersion;
+import io.github.SebastianDanielFrenz.SimpleDBMT.varTypes.Version;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerAlreadyRunningException;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerNotRunningException;
 import net.milkbowl.vault.economy.Economy;
@@ -36,7 +40,10 @@ public class Mc2Web extends JavaPlugin {
 
 	public static DataBaseHandler dbh;
 	public static DataBaseQuery query;
-	public static Comparor comparor;
+	public static Comparor comparor = new DefaultComparor();
+
+	public static Version version_required_simpleDBMT = new Version(new int[] { 2, 0, 0, 0 });
+	public static Version version_recommended_simpleDBMT = new Version(new int[] { 2, 0, 0, 0 });
 
 	public static void startWebServer() throws IOException, WebServerAlreadyRunningException {
 		if (server != null) {
@@ -72,12 +79,29 @@ public class Mc2Web extends JavaPlugin {
 		}
 
 		if (!setupEconomey()) {
-			getLogger().severe("§4Economy not found! Shutting down server.");
+			getLogger().info("§4Economy not found! Shutting down server.");
 			Bukkit.shutdown();
 		}
 		if (!setupDB()) {
-			getLogger().severe("§4DataBase not found! Shutting down server.");
+			getLogger().info("§4DataBase not found! Shutting down server.");
 			Bukkit.shutdown();
+		}
+		try {
+			if (comparor.Compare(new DBVersion(AdapterInfo.version), Comparor.BIGGER_EQUALS,
+					new DBVersion(version_required_simpleDBMT))) {
+				if (comparor.Compare(new DBVersion(AdapterInfo.version), Comparor.BIGGER,
+						new DBVersion(version_recommended_simpleDBMT))) {
+					getLogger().info("§eSimpleDBMT v" + new DBVersion(AdapterInfo.version).Display()
+							+ " is not verified for this version. If things break, try stepping down to v"
+							+ new DBVersion(version_recommended_simpleDBMT));
+				}
+			} else {
+				getLogger().info("§4SimpleDBMT v" + new DBVersion(AdapterInfo.version).Display()
+						+ " is outdated! This is likely to cause crashes.");
+			}
+
+		} catch (ComparorOperatorNotSupportedException e1) {
+			e1.printStackTrace();
 		}
 
 		prepareDBs();
