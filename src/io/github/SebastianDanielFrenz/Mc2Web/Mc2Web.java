@@ -78,6 +78,12 @@ public class Mc2Web extends JavaPlugin {
 			e1.printStackTrace();
 		}
 
+		try {
+			Files.createDirectories(Paths.get(getConfig().getString(cWEB_PATH)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		if (!setupEconomey()) {
 			getLogger().info("§4Economy not found! Shutting down server.");
 			Bukkit.shutdown();
@@ -131,8 +137,6 @@ public class Mc2Web extends JavaPlugin {
 		} catch (WebServerNotRunningException e) {
 			e.printStackTrace();
 		}
-
-		saveDBs();
 	}
 
 	private boolean setupEconomey() {
@@ -181,7 +185,7 @@ public class Mc2Web extends JavaPlugin {
 
 	public static void prepareDBs() {
 		try {
-			dbh.addDataBase(Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "Mc2Web.db");
+			dbh.addDataBase("Mc2Web.db");
 		} catch (IOException | ArrayIndexOutOfBoundsException e1) {
 			dbh.createDataBase("Mc2Web", "Mc2Web.db");
 
@@ -204,23 +208,13 @@ public class Mc2Web extends JavaPlugin {
 			cookies.addColumn("user");
 			cookies.addColumn("lastURL");
 			try {
-				dbh.saveDataBase("Mc2Web", Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "Mc2Web.db");
+				dbh.saveDataBase("Mc2Web", "Mc2Web.db");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 		}
 
 		query = new DefaultDataBaseQuery(dbh);
-	}
-
-	public static void saveDBs() {
-		for (String db : dbh.getDBnames()) {
-			try {
-				dbh.saveDataBase(db, Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "accounts.db");
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	public static final String cPORT = "port";
