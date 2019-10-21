@@ -17,7 +17,7 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class Utils {
 
-	public static String insertVariables(String text) {
+	public static String insertVariables(String text, String url, String user, Map<String, Object> url_encoded) {
 		text = text.replace("{IP}", Mc2Web.plugin.getConfig().getString(Mc2Web.cIP))
 				.replace("{PORT}", String.valueOf(Mc2Web.plugin.getConfig().getInt(Mc2Web.cPORT)))
 				.replace("{LIVEMAP_PORT}", Mc2Web.plugin.getConfig().getString(Mc2Web.cDYNMAP_PORT));
@@ -32,6 +32,9 @@ public class Utils {
 					} else if (text.startsWith("#enable offline_players_with_money;")) {
 						text = insertOfflinePlayersWithMoney(text);
 						text = text.replaceFirst("#enable offline_players_with_money;", "");
+					} else if (text.startsWith("#enable login;")) {
+						text = insertLogin(text, url, user);
+						text = text.replaceFirst("#enable login;", "");
 					}
 				} else {
 					text = text.replace("#enable ", "");
@@ -41,6 +44,10 @@ public class Utils {
 			}
 		}
 		return text;
+	}
+
+	public static String insertVariables(String text, Map<String, Object> url_encoded) {
+		return insertVariables(text, null, null, url_encoded);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -98,14 +105,25 @@ public class Utils {
 		return text.replace("{OFFLINE_PLAYERS_WITH_MONEY}", filler);
 	}
 
-	public static byte[] insertVariables(byte[] text) {
-		return insertVariables(new String(text)).getBytes();
+	public static byte[] insertVariables(byte[] text, Map<String, Object> url_encoded) {
+		return insertVariables(new String(text), url_encoded).getBytes();
 	}
 
-	public static String processFile(String filepath) throws IOException {
-		return insertVariables(new String(Files.readAllBytes(Paths
-				.get((Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP) && filepath.contains("//"))
-						? filepath : "plugins/Mc2Web/web/" + filepath))));
+	public static String processFile(String filepath, String url, String user, Map<String, Object> url_encoded)
+			throws IOException {
+		return insertVariables(
+				new String(Files
+						.readAllBytes(Paths.get((Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP)
+								&& filepath.contains("//")) ? filepath : "plugins/Mc2Web/web/" + filepath))),
+				url_encoded);
+	}
+
+	public static String insertLogin(String text, String url, String user) {
+		String filler = "<form method=\"post\" action=\"" + Mc2Web.plugin.getConfig().getString(Mc2Web.cURL_LOGIN_CHECK)
+				+ "\"><table class=\"login_component\"><tr><th>Username:</th><td><input type=\"text\" name=\"username\">"
+				+ "<td></tr><tr><th>Password:</th><td><input type=\"password\" name=\"password\"></td></tr>"
+				+ "<tr><td></td><td><input type=\"submit\" value=\"Lool\" style=\"float: right\"></td></tr></table></form>";
+		return text.replace("{LOGIN}", filler);
 	}
 
 	public static void parseQuery(String query, Map<String, Object> parameters) throws UnsupportedEncodingException {

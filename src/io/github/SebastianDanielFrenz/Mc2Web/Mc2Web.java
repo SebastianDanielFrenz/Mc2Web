@@ -159,7 +159,7 @@ public class Mc2Web extends JavaPlugin {
 		try {
 			dbh.addDataBase(Mc2Web.plugin.getConfig().getString(cDATABASE_PATH) + "Mc2Web.db");
 		} catch (IOException | ArrayIndexOutOfBoundsException e1) {
-			dbh.createDataBase("Mc2Web");
+			dbh.createDataBase("Mc2Web", "Mc2Web.db");
 
 			DataBase mc2web = dbh.getDataBase("Mc2Web");
 			mc2web.createTable("users");
@@ -225,35 +225,35 @@ public class Mc2Web extends JavaPlugin {
 	public static final String[] M_UPDATEPLAYERUUID_COLUMNS = new String[] { "UUID", "user" };
 
 	public static boolean doesUserExist(String user) {
-		return query.Run("accounts", "users", M_DOESUSEREXIST_COLUMNS,
+		return query.Run("Mc2Web", "users", M_DOESUSEREXIST_COLUMNS,
 				new SearchedValue[] { new SearchedValue("user", new DBString(user)) }).rows.size() > 0;
 	}
 
 	public static boolean doesUserExist(UUID uuid) {
-		return query.Run("accounts", "users", M_DOESUSEREXIST_COLUMNS,
+		return query.Run("Mc2Web", "users", M_DOESUSEREXIST_COLUMNS,
 				new SearchedValue[] { new SearchedValue("uuid", new DBString(uuid.toString())) }).rows.size() > 0;
 	}
 
 	public static String getPassword(String user) {
-		return ((DBString) query.Run("accounts", "users", M_GETPASSWORD_COLUMNS,
+		return ((DBString) query.Run("Mc2Web", "users", M_GETPASSWORD_COLUMNS,
 				new SearchedValue[] { new SearchedValue("user", new DBString(user)) }).rows.get(0).get(0)).getValue();
 	}
 
 	public static void registerUser(String user, String password, UUID uuid) {
-		query.Insert("accounts", "users",
+		query.Insert("Mc2Web", "users",
 				new SearchedValue[] { new SearchedValue("user", new DBString(user)),
 						new SearchedValue("password", new DBString(password)),
 						new SearchedValue("UUID", new DBString(uuid.toString())) });
 	}
 
 	public static void updatePlayerUUID(Player player) {
-		QueryResult result = query.Run("accounts", "users", M_UPDATEPLAYERUUID_COLUMNS,
+		QueryResult result = query.Run("Mc2Web", "users", M_UPDATEPLAYERUUID_COLUMNS,
 				new SearchedValue[] { new SearchedValue("UUID", new DBString(player.getUniqueId().toString())) });
 		if (result.rows.size() > 0) {
 			String user = ((DBString) result.rows.get(0).get(1)).getValue();
 
 			if (!player.getName().equals(user)) {
-				query.Update("accounts", "users",
+				query.Update("Mc2Web", "users",
 						new SearchedValue[] {
 								new SearchedValue("UUID", new DBString(player.getUniqueId().toString())) },
 						new SearchedValue[] { new SearchedValue("user", new DBString(player.getName())) });
