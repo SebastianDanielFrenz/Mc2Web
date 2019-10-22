@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.craftbukkit.libs.org.apache.commons.io.IOUtils;
+import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -22,11 +25,11 @@ public class RootHandler implements HttpHandler {
 				? Files.isRegularFile(Paths.get(file)) : Files.isRegularFile(Paths.get("plugins/Mc2Web/web/" + file));
 	}
 
-	public static void defaultHandler(String url, OutputStream os, HttpExchange he, Map<String, Object> url_encoded) {
+	public static void defaultHandler(String url, OutputStream os, HttpExchange he, Map<String, String> url_encoded) {
 		try {
 			byte[] response = Files.readAllBytes(Paths
 					.get((Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP) && url.contains("//"))
-							? url : "plugins/Mc2Web/web/" + url));
+							? url : Mc2Web.plugin.getConfig().getString(Mc2Web.cWEB_PATH) + url));
 			he.sendResponseHeaders(200, response.length);
 			os.write(response);
 
@@ -41,7 +44,8 @@ public class RootHandler implements HttpHandler {
 				} else {
 					response = "<html><head><title>ERROR</title></head><body><h1>The 404 page does not exist!"
 							+ " Please notify the server owner that the plugin is broken.</h1><br><br>"
-							+ "<h3>Failed while attempting to get URL: " + url + "</body></html>";
+							+ "<h3>Failed while attempting to get URL: " + url + "<br><br>Error:<br>"
+							+ ExceptionUtils.getStackTrace(e) + "</body></html>";
 				}
 				he.sendResponseHeaders(200, response.length());
 				os.write(response.getBytes());
@@ -59,17 +63,19 @@ public class RootHandler implements HttpHandler {
 		try {
 			String url = he.getRequestURI().toString().substring(1);
 
-			Map<String, Object> url_encoded = new HashMap<String, Object>();
+			Map<String, String> url_encoded = new HashMap<String, String>();
+			Map<String, String> body_encoded = new HashMap<String, String>();
+
+			String body = IOUtils.toString(he.getRequestBody(), Mc2Web.encoding);
 
 			if (url.contains("?")) {
 				System.out.println("Detected url with ?");
 				System.out.print(url);
-				String[] parts = url.split("\\?");
-				url = parts[0];
+				url = Utils.parseURL(url, url_encoded);
 				System.out.println(" -> " + url);
-
-				Utils.parseQuery(parts[1], url_encoded);
 			}
+
+			Utils.parseQuery(body, body_encoded);
 
 			OutputStream os = he.getResponseBody();
 
@@ -138,17 +144,18 @@ public class RootHandler implements HttpHandler {
 						} else if (Test(url + ".html")) {
 							response = Utils.processFile(url + ".html", url, logged_in_user, url_encoded);
 						} else if (url.equals(Mc2Web.plugin.getConfig().getString(Mc2Web.cURL_LOGIN_CHECK))) {
-							Map<String, Object> map = new HashMap<String, Object>();
-							Utils.parseQuery(he.getRequestBody().toString(), map);
 
-							String user = (String) map.get("user");
-							String password = (String) map.get("password");
+							System.out.println("request-body: " + body);
+
+							String user = body_encoded.get("username");
+							String password = body_encoded.get("password");
 
 							if (user == null || password == null) {
 								url = Mc2Web.plugin.getConfig().getString(Mc2Web.cURL_LOGIN_FAILED);
 								continue;
 							} else {
 								login_status = CookieStorage.loginUser(user, password);
+								System.out.println("login data: " + user + ";" + password + " -> " + login_status);
 
 								if (login_status != CookieStorage.SUCCESS) {
 									url = Mc2Web.plugin.getConfig().getString(Mc2Web.cURL_LOGIN_FAILED);

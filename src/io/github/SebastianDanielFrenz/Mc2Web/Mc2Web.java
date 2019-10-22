@@ -154,7 +154,7 @@ public class Mc2Web extends JavaPlugin {
 		getConfig().addDefault(cIP, "127.0.0.1");
 
 		getConfig().addDefault(cWEB_PATH, "plugins/Mc2Web/web/");
-		getConfig().addDefault(cDATABASE_PATH, "plugins/Mc2Web/db/");
+		getConfig().addDefault(cDATABASE_PATH, "");
 
 		getConfig().addDefault(cURL_LOGIN_CHECK, "login/check");
 		getConfig().addDefault(cURL_LOGIN_FAILED, "login/failed");
@@ -279,5 +279,7 @@ public class Mc2Web extends JavaPlugin {
 
 		}
 	}
+
+	public static final String encoding = "ISO-8859-1";
 
 }

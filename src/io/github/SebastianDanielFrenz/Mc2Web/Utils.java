@@ -1,12 +1,8 @@
 package io.github.SebastianDanielFrenz.Mc2Web;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
@@ -17,7 +13,7 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class Utils {
 
-	public static String insertVariables(String text, String url, String user, Map<String, Object> url_encoded) {
+	public static String insertVariables(String text, String url, String user, Map<String, String> url_encoded) {
 		text = text.replace("{IP}", Mc2Web.plugin.getConfig().getString(Mc2Web.cIP))
 				.replace("{PORT}", String.valueOf(Mc2Web.plugin.getConfig().getInt(Mc2Web.cPORT)))
 				.replace("{LIVEMAP_PORT}", Mc2Web.plugin.getConfig().getString(Mc2Web.cDYNMAP_PORT));
@@ -46,7 +42,7 @@ public class Utils {
 		return text;
 	}
 
-	public static String insertVariables(String text, Map<String, Object> url_encoded) {
+	public static String insertVariables(String text, Map<String, String> url_encoded) {
 		return insertVariables(text, null, null, url_encoded);
 	}
 
@@ -105,11 +101,11 @@ public class Utils {
 		return text.replace("{OFFLINE_PLAYERS_WITH_MONEY}", filler);
 	}
 
-	public static byte[] insertVariables(byte[] text, Map<String, Object> url_encoded) {
+	public static byte[] insertVariables(byte[] text, Map<String, String> url_encoded) {
 		return insertVariables(new String(text), url_encoded).getBytes();
 	}
 
-	public static String processFile(String filepath, String url, String user, Map<String, Object> url_encoded)
+	public static String processFile(String filepath, String url, String user, Map<String, String> url_encoded)
 			throws IOException {
 		return insertVariables(
 				new String(Files
@@ -126,40 +122,28 @@ public class Utils {
 		return text.replace("{LOGIN}", filler);
 	}
 
-	public static void parseQuery(String query, Map<String, Object> parameters) throws UnsupportedEncodingException {
+	public static void parseQuery(String query, Map<String, String> parameters) {
 
 		if (query != null) {
-			String pairs[] = query.split("[&]");
-			for (String pair : pairs) {
-				String param[] = pair.split("[=]");
-				String key = null;
-				String value = null;
-				if (param.length > 0) {
-					key = URLDecoder.decode(param[0], System.getProperty("file.encoding"));
+			String[] parts = query.split("[&]");
+			String[] subparts;
+			for (String part : parts) {
+				subparts = part.split("[=]");
+				if (subparts.length < 2) {
+					continue;
 				}
-
-				if (param.length > 1) {
-					value = URLDecoder.decode(param[1], System.getProperty("file.encoding"));
-				}
-
-				if (parameters.containsKey(key)) {
-					Object obj = parameters.get(key);
-					if (obj instanceof List<?>) {
-						@SuppressWarnings("unchecked")
-						List<String> values = (List<String>) obj;
-						values.add(value);
-
-					} else if (obj instanceof String) {
-						List<String> values = new ArrayList<String>();
-						values.add((String) obj);
-						values.add(value);
-						parameters.put(key, values);
-					}
-				} else {
-					parameters.put(key, value);
-				}
+				parameters.put(subparts[0], subparts[1]);
 			}
 		}
+	}
+
+	public static String parseURL(String url, Map<String, String> parameters) {
+		if (url != null) {
+			String[] parts = url.split("[?]");
+			parseQuery(parts[1], parameters);
+			return parts[0];
+		}
+		return "";
 	}
 
 }
