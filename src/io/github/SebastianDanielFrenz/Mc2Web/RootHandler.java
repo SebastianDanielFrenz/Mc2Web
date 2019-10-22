@@ -62,6 +62,9 @@ public class RootHandler implements HttpHandler {
 
 		try {
 			String url = he.getRequestURI().toString().substring(1);
+			if (url.endsWith("/")) {
+				url = url.substring(0, url.length() - 1);
+			}
 
 			Map<String, String> url_encoded = new HashMap<String, String>();
 			Map<String, String> body_encoded = new HashMap<String, String>();

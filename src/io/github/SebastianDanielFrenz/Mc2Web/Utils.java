@@ -115,7 +115,8 @@ public class Utils {
 	}
 
 	public static String insertLogin(String text, String url, String user) {
-		String filler = "<form method=\"post\" action=\"" + Mc2Web.plugin.getConfig().getString(Mc2Web.cURL_LOGIN_CHECK)
+		String filler = "<form method=\"post\" action=\"/"
+				+ Mc2Web.plugin.getConfig().getString(Mc2Web.cURL_LOGIN_CHECK)
 				+ "\"><table class=\"login_component\"><tr><th>Username:</th><td><input type=\"text\" name=\"username\">"
 				+ "<td></tr><tr><th>Password:</th><td><input type=\"password\" name=\"password\"></td></tr>"
 				+ "<tr><td></td><td><input type=\"submit\" value=\"Lool\" style=\"float: right\"></td></tr></table></form>";
