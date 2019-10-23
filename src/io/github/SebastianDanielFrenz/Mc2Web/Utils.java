@@ -20,8 +20,6 @@ public class Utils {
 		text = text.replace(System.lineSeparator(), "");
 
 		while (true) {
-			System.out.println("running " + text);
-
 			if (text.startsWith("#")) {
 				if (text.startsWith("#enable ")) {
 					if (text.startsWith("#enable online_players;")) {

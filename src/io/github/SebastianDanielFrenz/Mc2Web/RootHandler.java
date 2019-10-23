@@ -93,10 +93,13 @@ public class RootHandler implements HttpHandler {
 			if (cookieArgs.size() > 0) {
 				cookieID = cookieArgs.get(0).substring(3);
 				cookie = CookieStorage.getCookie(cookieID);
+				if (cookie == null) {
+					cookie = new Cookie("NULL");
+				}
 			} else {
-				cookieID = CookieStorage.generateCookieID();
+				cookieID = null;
 				cookie = new Cookie("NULL");
-				he.getResponseHeaders().set("Set-Cookie", "ID=" + String.valueOf(cookieID));
+
 			}
 
 			if (url.equals("cookie")) {
@@ -119,6 +122,7 @@ public class RootHandler implements HttpHandler {
 				if (cookie == null) {
 					logged_in_user = null;
 				} else {
+					System.out.println("user " + cookie.user + " asked for url: " + url);
 					logged_in_user = cookie.user;
 				}
 
@@ -165,7 +169,17 @@ public class RootHandler implements HttpHandler {
 									continue;
 								}
 
-								CookieStorage.updateCookieUser(cookieID, user);
+								if (cookieID == null) {
+									cookieID = CookieStorage.generateCookieID();
+									cookie = new Cookie(user);
+									CookieStorage.addCookie(cookieID, cookie);
+
+									he.getResponseHeaders().set("Set-Cookie", "ID=" + String.valueOf(cookieID));
+								} else {
+									CookieStorage.updateCookieUser(cookieID, user);
+									cookie.user = user;
+								}
+
 								url = "";
 								continue;
 							}
