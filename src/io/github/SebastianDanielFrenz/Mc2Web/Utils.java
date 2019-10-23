@@ -17,8 +17,11 @@ public class Utils {
 		text = text.replace("{IP}", Mc2Web.plugin.getConfig().getString(Mc2Web.cIP))
 				.replace("{PORT}", String.valueOf(Mc2Web.plugin.getConfig().getInt(Mc2Web.cPORT)))
 				.replace("{LIVEMAP_PORT}", Mc2Web.plugin.getConfig().getString(Mc2Web.cDYNMAP_PORT));
+		text = text.replace(System.lineSeparator(), "");
 
 		while (true) {
+			System.out.println("running " + text);
+
 			if (text.startsWith("#")) {
 				if (text.startsWith("#enable ")) {
 					if (text.startsWith("#enable online_players;")) {
@@ -31,6 +34,9 @@ public class Utils {
 					} else if (text.startsWith("#enable login;")) {
 						text = insertLogin(text, url, user);
 						text = text.replaceFirst("#enable login;", "");
+					} else if (text.startsWith("#enable user_menu;")) {
+						text = insertUserMenu(text, url, user);
+						text = text.replaceFirst("#enable user_menu;", "");
 					}
 				} else {
 					text = text.replace("#enable ", "");
@@ -121,6 +127,18 @@ public class Utils {
 				+ "<td></tr><tr><th>Password:</th><td><input type=\"password\" name=\"password\"></td></tr>"
 				+ "<tr><td></td><td><input type=\"submit\" value=\"Lool\" style=\"float: right\"></td></tr></table></form>";
 		return text.replace("{LOGIN}", filler);
+	}
+
+	public static String insertUserMenu(String text, String url, String user) {
+
+		if (user == null) {
+			return text.replace("{USER_MENU}",
+					"<a href=\"/" + Mc2Web.plugin.getConfig().getString(Mc2Web.cURL_LOGIN_FORM) + "\">Login</a>");
+		} else {
+			String filler = "<a href=\"/" + Mc2Web.plugin.getConfig().getString(Mc2Web.cURL_LOGIN_FORM) + "\">" + user
+					+ "</a>";
+			return text.replace("{USER_MENU}", filler);
+		}
 	}
 
 	public static void parseQuery(String query, Map<String, String> parameters) {

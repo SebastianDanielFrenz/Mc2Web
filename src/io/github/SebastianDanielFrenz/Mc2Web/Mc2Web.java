@@ -158,6 +158,7 @@ public class Mc2Web extends JavaPlugin {
 
 		getConfig().addDefault(cURL_LOGIN_CHECK, "login/check");
 		getConfig().addDefault(cURL_LOGIN_FAILED, "login/failed");
+		getConfig().addDefault(cURL_LOGIN_FORM, "login");
 
 		getConfig().addDefault(cDEBUG, false);
 
@@ -225,6 +226,7 @@ public class Mc2Web extends JavaPlugin {
 
 	public static final String cURL_LOGIN_CHECK = "url.login_check";
 	public static final String cURL_LOGIN_FAILED = "url.login_failed";
+	public static final String cURL_LOGIN_FORM = "url.login_form";
 
 	public static final String cDEBUG = "debug";
 
