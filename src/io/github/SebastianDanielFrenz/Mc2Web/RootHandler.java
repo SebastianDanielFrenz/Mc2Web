@@ -91,16 +91,23 @@ public class RootHandler implements HttpHandler {
 			String cookieID;
 
 			if (cookieArgs.size() > 0) {
-				cookieID = cookieArgs.get(0).substring(3);
+				if (cookieArgs.get(0).startsWith("token=")) {
+					cookieID = cookieArgs.get(0).split("[=]")[1];
+				} else {
+					cookieID = null;
+				}
 				cookie = CookieStorage.getCookie(cookieID);
 				if (cookie == null) {
 					cookie = new Cookie("NULL");
 				}
+				he.getResponseHeaders().set("Set-Cookie", "token=" + String.valueOf(cookieID));
 			} else {
 				cookieID = null;
 				cookie = new Cookie("NULL");
 
 			}
+
+			System.out.println("post processing: cookieID=" + cookieID);
 
 			if (url.equals("cookie")) {
 				String response = "";
@@ -113,6 +120,31 @@ public class RootHandler implements HttpHandler {
 				he.sendResponseHeaders(200, response.length());
 
 				os.write(response.getBytes());
+				os.close();
+				return;
+			}
+
+			if (url.equals("cmd")) {
+				String action = url_encoded.get("action");
+				System.out.println("CMD: ACTION: " + action);
+
+				String response = "";
+				if (action.equals("rmcookie")) {
+					he.getResponseHeaders().remove("Set-Cookie");
+					he.getResponseHeaders().add("Set-Cookie", "token=tmp");
+					response = "<html><head><title>Mc2Web - CMD</title></head><body>Ok.</body></html>";
+				} else if (action.equals("setcookie")) {
+					he.getResponseHeaders().remove("Set-Cookie");
+					he.getResponseHeaders().set("Set-Cookie", "token=" + url_encoded.get("cookie"));
+					response = "<html><head><title>Mc2Web - CMD</title></head><body>Ok.</body></html>";
+				} else {
+					response = "<html><head><title>Mc2Web - CMD</title></head><body>Command not found!</body></html>";
+				}
+
+				he.sendResponseHeaders(200, response.length());
+				os.write(response.getBytes());
+				os.close();
+				return;
 			}
 
 			int login_status;
@@ -128,6 +160,7 @@ public class RootHandler implements HttpHandler {
 
 				if (url.contains("//") && Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP)) {
 					String response;
+
 					if (Test("blocked/folder_up")) {
 						response = Utils.processFile("blocked/folder_up", url, logged_in_user, url_encoded);
 					} else if (Test("blocked/folder_up.html")) {
@@ -136,10 +169,12 @@ public class RootHandler implements HttpHandler {
 						response = "<html><head><title>Mc2Web - Blocked</title></head><body><h1><b>Haha</b></h1><br><h2>No.</h2>"
 								+ "</body></html>";
 					}
+
 					he.sendResponseHeaders(200, response.length());
 					os.write(response.getBytes());
 				} else {
 					if (!url.contains(".") || url.endsWith(".html")) {
+
 						String response;
 
 						if (url.equals("")) {
@@ -169,16 +204,25 @@ public class RootHandler implements HttpHandler {
 									continue;
 								}
 
+								System.out.println("CookieID before login: " + cookieID);
+
 								if (cookieID == null) {
 									cookieID = CookieStorage.generateCookieID();
 									cookie = new Cookie(user);
 									CookieStorage.addCookie(cookieID, cookie);
 
-									he.getResponseHeaders().set("Set-Cookie", "ID=" + String.valueOf(cookieID));
 								} else {
-									CookieStorage.updateCookieUser(cookieID, user);
-									cookie.user = user;
+									if (CookieStorage.getCookie(cookieID) == null) {
+										CookieStorage.addCookie(cookieID, new Cookie(user));
+									} else {
+
+										CookieStorage.updateCookieUser(cookieID, user);
+									}
 								}
+
+								cookie.user = user;
+
+								System.out.println("CookieID after login: " + cookieID);
 
 								url = "";
 								continue;
@@ -195,8 +239,14 @@ public class RootHandler implements HttpHandler {
 										+ "<h3>Failed while attempting to get URL: " + url + "</body></html>";
 							}
 						}
+
+						if (cookieID != null) {
+							he.getResponseHeaders().remove("Set-Cookie");
+							he.getResponseHeaders().set("Set-Cookie", "token=" + String.valueOf(cookieID));
+						}
 						he.sendResponseHeaders(200, response.length());
 						os.write(response.getBytes());
+
 					} else if (url.endsWith(".js")) {
 						he.getResponseHeaders().set(CT, "application/javascript");
 						defaultHandler(url, os, he, url_encoded);
@@ -226,7 +276,9 @@ public class RootHandler implements HttpHandler {
 					}
 				}
 
-				cookie = CookieStorage.getCookie(cookieID);
+				if (cookieID != null) {
+					cookie = CookieStorage.getCookie(cookieID);
+				}
 				break;
 			}
 

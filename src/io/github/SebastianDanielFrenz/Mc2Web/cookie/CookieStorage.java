@@ -53,15 +53,21 @@ public class CookieStorage {
 		return (result.rows.size() == 0) ? null : new Cookie(((DBString) result.rows.get(0).get(0)).getValue());
 	}
 
+	public static final char[] COOKIE_ALLOWED_CHARACTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			.toCharArray();
+
 	public static String generateCookieID() {
 		QueryResult result;
 		Random random = new Random();
 		String ID;
-		byte[] bytes;
+		char[] chars;
 		while (true) {
-			bytes = new byte[128];
-			random.nextBytes(bytes);
-			ID = new String(bytes);
+			
+			chars = new char[128];
+			for (int i = 0; i < chars.length; i++) {
+				chars[i] = COOKIE_ALLOWED_CHARACTERS[random.nextInt(COOKIE_ALLOWED_CHARACTERS.length)];
+			}
+			ID = new String(chars);
 			result = Mc2Web.query.Run("Mc2Web", "cookies", new String[] {},
 					new SearchedValue[] { new SearchedValue("ID", new DBString(ID)) });
 			if (result.rows.size() == 0) {

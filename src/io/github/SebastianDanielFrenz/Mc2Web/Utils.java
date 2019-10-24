@@ -114,7 +114,7 @@ public class Utils {
 		return insertVariables(
 				new String(Files
 						.readAllBytes(Paths.get((Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP)
-								&& filepath.contains("//")) ? filepath : "plugins/Mc2Web/web/" + filepath))),
+								&& filepath.contains("//")) ? filepath : "plugins/Mc2Web/web/" + filepath))), url, user, 
 				url_encoded);
 	}
 
@@ -129,7 +129,7 @@ public class Utils {
 
 	public static String insertUserMenu(String text, String url, String user) {
 
-		if (user == null) {
+		if (user == null || user.equalsIgnoreCase("null")) {
 			return text.replace("{USER_MENU}",
 					"<a href=\"/" + Mc2Web.plugin.getConfig().getString(Mc2Web.cURL_LOGIN_FORM) + "\">Login</a>");
 		} else {
