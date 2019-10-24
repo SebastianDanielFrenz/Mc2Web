@@ -1,0 +1,17 @@
+port: 8124
+ip: 127.0.0.1
+web_path: plugins/Mc2Web/web/
+database_path: ''
+url:
+  login_check: login/check
+  login_failed: login/failed
+  login_form: login
+debug: false
+security:
+  block:
+    folder_up: true
+dynmap:
+  port: 8123
+  enabled: true
+permissionsex:
+  enabled: true
