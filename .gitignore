@@ -1,1 +1,11 @@
-run
+run/word
+run/world_the_end
+run/world_nether
+run/logs
+run/banned-ips.json
+run/banned-players.json
+run/cookies.html
+run/ops.json
+run/usercache.json
+run/users.html
+run/whitelist.json
