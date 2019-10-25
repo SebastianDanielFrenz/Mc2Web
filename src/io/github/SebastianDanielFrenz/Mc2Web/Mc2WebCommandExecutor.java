@@ -163,13 +163,15 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 				}
 			} else if (args[0].equalsIgnoreCase("dump")) {
 				if (hasPermission(sender, permission_dump)) {
+
 					try {
-						Mc2Web.dbh.getDataBase("accounts").getTable("users").ToQueryResult()
+						Mc2Web.dbh.getDataBase("Mc2Web").getTable("users").ToQueryResult()
 								.DumpHTMLandFormat("plugins/Mc2Web/web/users.html");
+
+						sender.sendMessage(prefix + "§aDone!");
 					} catch (FileNotFoundException e) {
 						e.printStackTrace();
 					}
-					sender.sendMessage(prefix + "Dumped user table to plugins/Mc2Web/web/users.html!");
 				}
 			} else {
 				sender.sendMessage(prefix + error_command_not_found);
