@@ -25,24 +25,6 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 	public static final String[] permission_dump = { "Mc2Web.dump" };
 
 	public static final String prefix = "§f[§eMc2Web§f]: §a";
-	public static final String error_permission_denied = "§4Permission denied!";
-	public static final String error_internal = "§4An internal error occured!";
-	public static final String error_web_server_already_running = "§4The web server is already running! "
-			+ "If you could start the web server while it was running, you would override the value of the variable"
-			+ " holding the Object that is the webserver. This would not cause the old server to be shut down,"
-			+ " instead it would cause multiple servers to be up at once. The new server would crash,"
-			+ " because the port of the web server is already used. The old server could not be shut down either,"
-			+ " because it is not a variable anymore, but an object managing a seperate thread to the server"
-			+ " and the new web server. Shutting down the server would not work properly,"
-			+ " because it would wait for all threads to close. You would have to force the shuttdown.";
-	public static final String error_web_server_not_running = "§4The web server is not running!";
-	public static final String error_command_not_found = "§4Command not found!";
-	public static final String error_not_a_player = "§4You have to be a player to do this!";
-	public static final String error_not_enough_arguments = "§4Not enough arguments!";
-
-	public static final String msg_server_started = "§aServer started!";
-	public static final String msg_server_stopped = "§aServer stopped!";
-	public static final String msg_registered = "§aRegistered!";
 
 	public static boolean hasPermission(CommandSender sender, String[] perms) {
 		for (String perm : perms) {
@@ -68,8 +50,8 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 	}
 
 	public static void permissionDenied(CommandSender sender, String[] perms) {
-		sender.sendMessage(
-				prefix + error_permission_denied + " You need one of the following permissions in order to this:");
+		sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_PERMISSION_DENIED) + " "
+				+ Mc2Web.lang.get(Mc2Web.lERROR_PERMISSIONS_NEEDED));
 		for (String perm : perms) {
 			sender.sendMessage(prefix + " - §e" + perm);
 		}
@@ -94,11 +76,11 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 				if (hasPermission(sender, permission_start)) {
 					try {
 						Mc2Web.startWebServer();
-						sender.sendMessage(prefix + msg_server_started);
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STARTED));
 					} catch (IOException e) {
 						e.printStackTrace();
 
-						sender.sendMessage(prefix + error_internal);
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_INTERNAL));
 
 						StringWriter sw = new StringWriter();
 						PrintWriter pw = new PrintWriter(sw);
@@ -114,32 +96,33 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 						}
 
 					} catch (WebServerAlreadyRunningException e) {
-						sender.sendMessage(error_web_server_already_running);
+						sender.sendMessage(Mc2Web.lang.get(Mc2Web.lERROR_WEB_SERVER_ALREADY_RUNNING));
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("stop")) {
 				if (hasPermission(sender, permission_stop)) {
 					try {
 						Mc2Web.stopWebServer();
-						sender.sendMessage(prefix + msg_server_stopped);
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STOPPED));
 					} catch (WebServerNotRunningException e) {
-						sender.sendMessage(error_web_server_not_running);
+						sender.sendMessage(Mc2Web.lang.get(Mc2Web.lERROR_WEB_SERVER_NOT_RUNNING));
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("restart")) {
 				if (hasPermission(sender, permission_restart)) {
 					try {
 						Mc2Web.stopWebServer();
-						sender.sendMessage(prefix + msg_server_stopped);
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STOPPED));
 					} catch (WebServerNotRunningException e) {
-						sender.sendMessage(prefix + error_web_server_not_running);
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_WEB_SERVER_NOT_RUNNING));
 					}
 					try {
 						Mc2Web.startWebServer();
-						sender.sendMessage(prefix + msg_server_started);
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STARTED));
 					} catch (IOException | WebServerAlreadyRunningException e) {
 						e.printStackTrace();
-						sender.sendMessage(prefix + error_internal + " The server failed to start!");
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_INTERNAL) + ": "
+								+ Mc2Web.lang.get(Mc2Web.lERROR_START_FAILED));
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("reload")) {
@@ -153,12 +136,12 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 						if (args.length >= 2) {
 							Player player = (Player) sender;
 							Mc2Web.registerUser(player.getName(), args[1], player.getUniqueId());
-							sender.sendMessage(prefix + msg_registered);
+							sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_REGISTERED));
 						} else {
-							sender.sendMessage(prefix + error_not_enough_arguments);
+							sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_NOT_ENOUGH_ARGUMENTS));
 						}
 					} else {
-						sender.sendMessage(prefix + error_not_a_player);
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_NOT_A_PLAYER));
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("dump")) {
@@ -174,7 +157,7 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 					}
 				}
 			} else {
-				sender.sendMessage(prefix + error_command_not_found);
+				sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_COMMAND_NOT_FOUND));
 			}
 		}
 

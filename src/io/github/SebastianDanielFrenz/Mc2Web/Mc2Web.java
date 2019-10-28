@@ -29,6 +29,7 @@ import io.github.SebastianDanielFrenz.SimpleDBMT.varTypes.DBVersion;
 import io.github.SebastianDanielFrenz.SimpleDBMT.varTypes.Version;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerAlreadyRunningException;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerNotRunningException;
+import io.github.SebastianDanielFrenz.Mc2Web.lang.Lang;
 import net.milkbowl.vault.economy.Economy;
 
 public class Mc2Web extends JavaPlugin {
@@ -44,6 +45,8 @@ public class Mc2Web extends JavaPlugin {
 
 	public static Version version_required_simpleDBMT = new Version(new int[] { 2, 0, 0, 0 });
 	public static Version version_recommended_simpleDBMT = new Version(new int[] { 2, 0, 0, 0 });
+
+	public static Lang lang;
 
 	public static void startWebServer() throws IOException, WebServerAlreadyRunningException {
 		if (server != null) {
@@ -80,6 +83,12 @@ public class Mc2Web extends JavaPlugin {
 
 		try {
 			Files.createDirectories(Paths.get(getConfig().getString(cWEB_PATH)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		try {
+			Files.createDirectories(Paths.get(getConfig().getString(cLANG_PATH)));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -153,8 +162,11 @@ public class Mc2Web extends JavaPlugin {
 		getConfig().addDefault(cPORT, 8124);
 		getConfig().addDefault(cIP, "127.0.0.1");
 
+		getConfig().addDefault(cLANG, "en_US");
+
 		getConfig().addDefault(cWEB_PATH, "plugins/Mc2Web/web/");
 		getConfig().addDefault(cDATABASE_PATH, "");
+		getConfig().addDefault(cLANG_PATH, "plugins/Mc2Web/lang/");
 
 		getConfig().addDefault(cURL_LOGIN_CHECK, "login/check");
 		getConfig().addDefault(cURL_LOGIN_FAILED, "login/failed");
@@ -221,8 +233,11 @@ public class Mc2Web extends JavaPlugin {
 	public static final String cPORT = "port";
 	public static final String cIP = "ip";
 
+	public static final String cLANG = "lang";
+
 	public static final String cWEB_PATH = "web_path";
 	public static final String cDATABASE_PATH = "database_path";
+	public static final String cLANG_PATH = "lang_path";
 
 	public static final String cURL_LOGIN_CHECK = "url.login_check";
 	public static final String cURL_LOGIN_FAILED = "url.login_failed";
@@ -243,6 +258,23 @@ public class Mc2Web extends JavaPlugin {
 	public static final String[] M_GETPASSWORD_COLUMNS = new String[] { "password" };
 	public static final String[] M_DOESUSEREXIST_COLUMNS = new String[] {};
 	public static final String[] M_UPDATEPLAYERUUID_COLUMNS = new String[] { "UUID", "user" };
+
+	public static final String lERROR_PERMISSION_DENIED = "error.permission_denied";
+	public static final String lERROR_PERMISSIONS_NEEDED = "error.permissions_needed";
+	public static final String lERROR_INTERNAL = "error.internal";
+	public static final String lERROR_WEB_SERVER_ALREADY_RUNNING = "error.web_server_already_running";
+	public static final String lERROR_WEB_SERVER_NOT_RUNNING = "error.web_server_not_running";
+	public static final String lERROR_START_FAILED = "error.start_failed";
+	public static final String lERROR_COMMAND_NOT_FOUND = "error.command_not_found";
+	public static final String lERROR_NOT_A_PLAYER = "error.not_a_player";
+	public static final String lERROR_NOT_ENOUGH_ARGUMENTS = "error.not_enough_arguments";
+	public static final String lMSG_SERVER_STARTED = "msg.server_started";
+	public static final String lMSG_SERVER_STOPPED = "msg.server_stopped";
+	public static final String lMSG_REGISTERED = "msg.registered";
+	public static final String lWEB_ERROR_FILE_NOT_FOUND_TITLE = "web.error.file_not_found.title";
+	public static final String lWEB_ERROR_FILE_NOT_FOUND_HEADING = "web.error.file_not_found.heading";
+	public static final String lWEB_MSG_CMD_SETCOOKIE = "web.msg.cmd.setcookie";
+	public static final String lWEB_MSG_CMD_RMCOOKIE = "web.msg.cmd.rmcookie";
 
 	public static boolean doesUserExist(String user) {
 		return query.Run("Mc2Web", "users", M_DOESUSEREXIST_COLUMNS,
@@ -283,5 +315,20 @@ public class Mc2Web extends JavaPlugin {
 	}
 
 	public static final String encoding = "ISO-8859-1";
+
+	public static void copyWebFiles(String dir) {
+		String[] files = new String[] { "index.html", "leaderboard.html", "login.html", "style.css", "test.js" };
+		try {
+			Files.createDirectories(Paths.get(plugin.getConfig().getString(cWEB_PATH)));
+
+			for (String file : files) {
+				Files.createDirectories(Paths.get(plugin.getConfig().getString(cWEB_PATH) + file));
+
+				Utils.exportFile("/res/web/" + file, plugin.getConfig().getString(cWEB_PATH) + file);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 }

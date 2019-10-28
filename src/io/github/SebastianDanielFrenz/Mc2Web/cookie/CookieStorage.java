@@ -62,7 +62,7 @@ public class CookieStorage {
 		String ID;
 		char[] chars;
 		while (true) {
-			
+
 			chars = new char[128];
 			for (int i = 0; i < chars.length; i++) {
 				chars[i] = COOKIE_ALLOWED_CHARACTERS[random.nextInt(COOKIE_ALLOWED_CHARACTERS.length)];
@@ -70,7 +70,7 @@ public class CookieStorage {
 			ID = new String(chars);
 			result = Mc2Web.query.Run("Mc2Web", "cookies", new String[] {},
 					new SearchedValue[] { new SearchedValue("ID", new DBString(ID)) });
-			if (result.rows.size() == 0) {
+			if (result.rows.size() == 0 || ID.equals("disabled")) {
 				break;
 			}
 		}

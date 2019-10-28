@@ -1,6 +1,8 @@
 package io.github.SebastianDanielFrenz.Mc2Web;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -10,6 +12,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import ru.tehkode.permissions.bukkit.PermissionsEx;
+import sun.net.ResourceManager;
 
 public class Utils {
 
@@ -114,8 +117,8 @@ public class Utils {
 		return insertVariables(
 				new String(Files
 						.readAllBytes(Paths.get((Mc2Web.plugin.getConfig().getBoolean(Mc2Web.cSECURITY_BLOCK_FOLDER_UP)
-								&& filepath.contains("//")) ? filepath : "plugins/Mc2Web/web/" + filepath))), url, user, 
-				url_encoded);
+								&& filepath.contains("//")) ? filepath : "plugins/Mc2Web/web/" + filepath))),
+				url, user, url_encoded);
 	}
 
 	public static String insertLogin(String text, String url, String user) {
@@ -161,6 +164,24 @@ public class Utils {
 			return parts[0];
 		}
 		return "";
+	}
+
+	public static void exportFile(String src, String dst) throws IOException {
+		InputStream stream = ResourceManager.class.getResourceAsStream(src);
+
+		FileWriter fw = new FileWriter(dst);
+		int c;
+
+		while (true) {
+			c = stream.read();
+			if (c == -1) {
+				break;
+			}
+			fw.write(c);
+		}
+
+		fw.flush();
+		fw.close();
 	}
 
 }

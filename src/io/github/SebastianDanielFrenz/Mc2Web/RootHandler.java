@@ -131,7 +131,7 @@ public class RootHandler implements HttpHandler {
 				String response = "";
 				if (action.equals("rmcookie")) {
 					he.getResponseHeaders().remove("Set-Cookie");
-					he.getResponseHeaders().add("Set-Cookie", "token=tmp");
+					he.getResponseHeaders().add("Set-Cookie", "token=disabled");
 					response = "<html><head><title>Mc2Web - CMD</title></head><body>Ok.</body></html>";
 				} else if (action.equals("setcookie")) {
 					he.getResponseHeaders().remove("Set-Cookie");

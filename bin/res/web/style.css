@@ -1,0 +1,86 @@
+* {
+	padding: 0px;
+	margin: 0px;
+	color: white;
+}
+body {
+	background-color: #333333;
+}
+
+
+div.menu {
+	background-color: #005500;
+	padding-left: 5%;
+	padding-right: 5%;
+	padding-top: 1%;
+	padding-bottom: 1%;
+	font-size: 25px;
+}
+.menu li {
+	display: inline;
+	padding-right: 10%;
+}
+.menu a {
+	text-decoration: none;
+}
+
+
+div.online_players {
+	margin-top: 2.5%;
+	margin-left: 2.5%;
+	padding-left: 2.5%;
+	width: 30%;
+	text-align: center;
+	color: red;
+}
+div.online_players_inner {
+	border: 2px solid black;
+	display: flex;
+}
+.online_players_inner li {
+	padding-right: 0px;
+	margin-right: 0px;
+}
+.online_players_inner ul {
+	list-style: none;
+}
+.online_players_inner p {
+	
+}
+.online_player_component {
+	float: left;
+}
+td {
+	vertical-align: top;
+}
+
+h1 {
+	text-align: center;
+	margin-top: 5%;
+}
+
+div.leaderboard {
+	text-align: center;
+	margin-left: 5%;
+	margin-right: 5%;
+	margin-bottom: 10%;
+}
+
+div.offline_players_with_money_component {
+	width: 100%;
+}
+
+.leaderboard td {
+	width: 50%;
+	padding: 0.75%;
+}
+.leaderboard table {
+	width: 100%;
+}
+
+.offline_players_with_money_name {
+	text-align: right;
+}
+.offline_players_with_money_balance {
+	text-align: left;
+}
