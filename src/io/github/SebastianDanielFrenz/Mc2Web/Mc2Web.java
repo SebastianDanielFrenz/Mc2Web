@@ -322,9 +322,20 @@ public class Mc2Web extends JavaPlugin {
 			Files.createDirectories(Paths.get(plugin.getConfig().getString(cWEB_PATH)));
 
 			for (String file : files) {
-				Files.createDirectories(Paths.get(plugin.getConfig().getString(cWEB_PATH) + file));
-
 				Utils.exportFile("/res/web/" + file, plugin.getConfig().getString(cWEB_PATH) + file);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void copyLangFiles(String dir) {
+		String[] files = new String[] { "de_DE.lang", "en_US.lang" };
+		try {
+			Files.createDirectories(Paths.get(plugin.getConfig().getString(cLANG_PATH)));
+
+			for (String file : files) {
+				Utils.exportFile("/res/lang/" + file, plugin.getConfig().getString(cLANG_PATH) + file);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
