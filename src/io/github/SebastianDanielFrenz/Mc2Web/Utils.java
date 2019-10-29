@@ -1,6 +1,5 @@
 package io.github.SebastianDanielFrenz.Mc2Web;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -169,19 +168,7 @@ public class Utils {
 	public static void exportFile(String src, String dst) throws IOException {
 		InputStream stream = ResourceManager.class.getResourceAsStream(src);
 
-		FileWriter fw = new FileWriter(dst);
-		int c;
-
-		while (true) {
-			c = stream.read();
-			if (c == -1) {
-				break;
-			}
-			fw.write(c);
-		}
-
-		fw.flush();
-		fw.close();
+		Files.copy(stream, Paths.get(dst));
 	}
 
 }

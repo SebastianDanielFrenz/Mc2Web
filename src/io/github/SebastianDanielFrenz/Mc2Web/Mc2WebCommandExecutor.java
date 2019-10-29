@@ -128,6 +128,22 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("reload")) {
 				if (hasPermission(sender, permission_reload)) {
 					Mc2Web.plugin.reloadConfig();
+
+					try {
+						Mc2Web.stopWebServer();
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STOPPED));
+					} catch (WebServerNotRunningException e) {
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_WEB_SERVER_NOT_RUNNING));
+					}
+					try {
+						Mc2Web.startWebServer();
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STARTED));
+					} catch (IOException | WebServerAlreadyRunningException e) {
+						e.printStackTrace();
+						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_INTERNAL) + ": "
+								+ Mc2Web.lang.get(Mc2Web.lERROR_START_FAILED));
+					}
+
 					sender.sendMessage(prefix + "Config reloaded!");
 				}
 			} else if (args[0].equalsIgnoreCase("register")) {
