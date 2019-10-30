@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
@@ -11,7 +12,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import ru.tehkode.permissions.bukkit.PermissionsEx;
-import sun.net.ResourceManager;
 
 public class Utils {
 
@@ -166,9 +166,11 @@ public class Utils {
 	}
 
 	public static void exportFile(String src, String dst) throws IOException {
-		InputStream stream = ResourceManager.class.getResourceAsStream(src);
+		InputStream stream = Mc2Web.plugin.getClass().getResourceAsStream(src);
 
-		Files.copy(stream, Paths.get(dst));
+		Files.copy(stream, Paths.get(dst), StandardCopyOption.REPLACE_EXISTING);
+
+		stream.close();
 	}
 
 }

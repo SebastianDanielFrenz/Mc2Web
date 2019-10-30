@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerAlreadyRunningException;
 import io.github.SebastianDanielFrenz.Mc2Web.exceptions.WebServerNotRunningException;
+import io.github.SebastianDanielFrenz.Mc2Web.lang.Lang;
 
 public class Mc2WebCommandExecutor implements CommandExecutor {
 
@@ -128,6 +131,23 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("reload")) {
 				if (hasPermission(sender, permission_reload)) {
 					Mc2Web.plugin.reloadConfig();
+					try {
+						Mc2Web.lang = new Lang(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG), "Mc2Web");
+					} catch (IOException e1) {
+						e1.printStackTrace();
+
+						sender.sendMessage(prefix + "§4Could not load language file \""
+								+ Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG) + "\"!");
+						sender.sendMessage(prefix + "§4Factory resetting lang files...");
+
+						try {
+							Files.createDirectories(Paths.get(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH)));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+						Mc2Web.copyLangFiles(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH));
+					}
 
 					try {
 						Mc2Web.stopWebServer();
@@ -172,6 +192,8 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 						e.printStackTrace();
 					}
 				}
+			} else if (args[0].equalsIgnoreCase("lang")) {
+				sender.sendMessage(Lang.getLanguage((Player) sender));
 			} else {
 				sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_COMMAND_NOT_FOUND));
 			}

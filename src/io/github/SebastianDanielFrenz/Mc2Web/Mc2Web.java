@@ -76,21 +76,26 @@ public class Mc2Web extends JavaPlugin {
 		loadConfiguration();
 
 		try {
-			Files.createDirectories(Paths.get(getConfig().getString(cDATABASE_PATH)));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		try {
-			Files.createDirectories(Paths.get(getConfig().getString(cWEB_PATH)));
+			if (!Files.isDirectory(Paths.get(getConfig().getString(cWEB_PATH)))) {
+				Files.createDirectories(Paths.get(getConfig().getString(cWEB_PATH)));
+				copyWebFiles(getConfig().getString(cWEB_PATH));
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
 		try {
-			Files.createDirectories(Paths.get(getConfig().getString(cLANG_PATH)));
+			if (!Files.isDirectory(Paths.get(getConfig().getString(cLANG_PATH)))) {
+				Files.createDirectories(Paths.get(getConfig().getString(cLANG_PATH)));
+				copyLangFiles(getConfig().getString(cLANG_PATH));
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		try {
+			lang = new Lang(getConfig().getString(cLANG), "Mc2Web");
+		} catch (IOException e2) {
+			e2.printStackTrace();
 		}
 
 		if (!setupEconomey()) {
@@ -137,6 +142,7 @@ public class Mc2Web extends JavaPlugin {
 
 			getServer().getPluginManager().disablePlugin(this);
 		}
+
 	}
 
 	@Override
@@ -330,7 +336,7 @@ public class Mc2Web extends JavaPlugin {
 	}
 
 	public static void copyLangFiles(String dir) {
-		String[] files = new String[] { "de_DE.lang", "en_US.lang" };
+		String[] files = new String[] { "de_de.lang", "en_us.lang" };
 		try {
 			Files.createDirectories(Paths.get(plugin.getConfig().getString(cLANG_PATH)));
 
