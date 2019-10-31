@@ -1,13 +1,13 @@
 error.permission_denied=§4Zugriff verweigert!
 error.permissions_needed=Du brauchst mindestens eine der folgenden Berechtigungen, um das zu dürfen:
-error.internal=§4Interner Fehler!
+error.internal=§4Es ist ein unerwarteter Fehler aufgetreten!
 error.web_server_already_running=§4Der Webserver läuft bereits!
 error.web_server_not_running=§4Der Webserver läuft nicht!
 error.start_failed=Der Server konnte nicht starten!
 error.command_not_found=§4Der Befehl wurde nicht gefunden!
 error.not_a_player=§4Du musst ein Spieler sein, um das tun zu dürfen!
 error.not_enough_arguments=§4Nicht genügend Argumente!
-msg.server_started=§aServer ist gestartet!
+msg.server_started=§aServer wurde gestartet!
 msg.server_stopped=§4Server wurde gestoppt!
 msg.registered=§aRegistriert!
 msg.reloaded=Neu geladen!
