@@ -66,7 +66,18 @@ public class Lang {
 
 	public Lang(Path lang) throws IOException {
 		map = new HashMap<String, String>();
-		List<String> lines = Files.readAllLines(lang, StandardCharsets.ISO_8859_1);
+		List<String> lines;
+
+		while (true) {
+			lines = Files.readAllLines(lang, StandardCharsets.ISO_8859_1);
+
+			if (lines.get(0).startsWith("redirect=")) {
+				lang = Paths.get(
+						Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH) + lines.get(0).substring(9) + ".lang");
+			} else {
+				break;
+			}
+		}
 
 		for (int i = 0; i < lines.size(); i++) {
 			String[] split = lines.get(i).split("[=]");

@@ -167,7 +167,7 @@ public class Mc2Web extends JavaPlugin {
 		getConfig().addDefault(cPORT, 8124);
 		getConfig().addDefault(cIP, "127.0.0.1");
 
-		getConfig().addDefault(cLANG, "en_US");
+		getConfig().addDefault(cLANG, "en_us");
 
 		getConfig().addDefault(cWEB_PATH, "plugins/Mc2Web/web/");
 		getConfig().addDefault(cDATABASE_PATH, "");
