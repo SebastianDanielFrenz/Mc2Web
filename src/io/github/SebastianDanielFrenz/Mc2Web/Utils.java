@@ -1,7 +1,11 @@
 package io.github.SebastianDanielFrenz.Mc2Web;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -171,6 +175,19 @@ public class Utils {
 		Files.copy(stream, Paths.get(dst), StandardCopyOption.REPLACE_EXISTING);
 
 		stream.close();
+	}
+
+	public static void exportFiles(String src, String dst) throws URISyntaxException, IOException {
+		URL url = Mc2Web.class.getResource(src);
+		if (url == null) {
+			throw new FileNotFoundException("Could not find " + src + " inside jar!");
+		} else {
+			File dir = new File(url.toURI());
+			for (File file : dir.listFiles()) {
+				Files.copy(Mc2Web.class.getResourceAsStream(src + "/" + file.getName()),
+						Paths.get(dst + "/" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
+			}
+		}
 	}
 
 }

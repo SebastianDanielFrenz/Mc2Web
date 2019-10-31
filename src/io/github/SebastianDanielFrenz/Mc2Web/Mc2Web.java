@@ -3,6 +3,7 @@ package io.github.SebastianDanielFrenz.Mc2Web;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
@@ -46,8 +47,6 @@ public class Mc2Web extends JavaPlugin {
 	public static Version version_required_simpleDBMT = new Version(new int[] { 2, 0, 0, 0 });
 	public static Version version_recommended_simpleDBMT = new Version(new int[] { 2, 0, 0, 0 });
 
-	public static Lang lang;
-
 	public static void startWebServer() throws IOException, WebServerAlreadyRunningException {
 		if (server != null) {
 			throw new WebServerAlreadyRunningException();
@@ -78,7 +77,7 @@ public class Mc2Web extends JavaPlugin {
 		try {
 			if (!Files.isDirectory(Paths.get(getConfig().getString(cWEB_PATH)))) {
 				Files.createDirectories(Paths.get(getConfig().getString(cWEB_PATH)));
-				copyWebFiles(getConfig().getString(cWEB_PATH));
+				copyWebFiles();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -87,13 +86,13 @@ public class Mc2Web extends JavaPlugin {
 		try {
 			if (!Files.isDirectory(Paths.get(getConfig().getString(cLANG_PATH)))) {
 				Files.createDirectories(Paths.get(getConfig().getString(cLANG_PATH)));
-				copyLangFiles(getConfig().getString(cLANG_PATH));
+				copyLangFiles();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		try {
-			lang = new Lang(getConfig().getString(cLANG), "Mc2Web");
+			Lang.registerLangs();
 		} catch (IOException e2) {
 			e2.printStackTrace();
 		}
@@ -322,28 +321,26 @@ public class Mc2Web extends JavaPlugin {
 
 	public static final String encoding = "ISO-8859-1";
 
-	public static void copyWebFiles(String dir) {
-		String[] files = new String[] { "index.html", "leaderboard.html", "login.html", "style.css", "test.js" };
+	public static void copyWebFiles() {
 		try {
 			Files.createDirectories(Paths.get(plugin.getConfig().getString(cWEB_PATH)));
 
-			for (String file : files) {
-				Utils.exportFile("/res/web/" + file, plugin.getConfig().getString(cWEB_PATH) + file);
-			}
+			Utils.exportFiles("/res/web", plugin.getConfig().getString(cWEB_PATH));
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void copyLangFiles(String dir) {
-		String[] files = new String[] { "de_de.lang", "en_us.lang" };
+	public static void copyLangFiles() {
 		try {
 			Files.createDirectories(Paths.get(plugin.getConfig().getString(cLANG_PATH)));
 
-			for (String file : files) {
-				Utils.exportFile("/res/lang/" + file, plugin.getConfig().getString(cLANG_PATH) + file);
-			}
+			Utils.exportFiles("/res/lang", plugin.getConfig().getString(cLANG_PATH));
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}

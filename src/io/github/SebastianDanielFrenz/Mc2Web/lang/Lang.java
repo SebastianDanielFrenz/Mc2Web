@@ -1,16 +1,19 @@
 package io.github.SebastianDanielFrenz.Mc2Web.lang;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import io.github.SebastianDanielFrenz.Mc2Web.Mc2Web;
@@ -57,15 +60,23 @@ public class Lang {
 		}
 	}
 
-	public Lang(String lang, String plugin) throws IOException {
+	public Lang(String lang) throws IOException {
+		this(Paths.get(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH) + lang + ".lang"));
+	}
+
+	public Lang(Path lang) throws IOException {
 		map = new HashMap<String, String>();
-		List<String> lines = Files.readAllLines(
-				Paths.get(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH) + lang + ".lang"),
-				StandardCharsets.ISO_8859_1);
+		List<String> lines = Files.readAllLines(lang, StandardCharsets.ISO_8859_1);
 
 		for (int i = 0; i < lines.size(); i++) {
 			String[] split = lines.get(i).split("[=]");
 			map.put(split[0], split[1]);
+		}
+	}
+
+	public static void registerLangs() throws IOException {
+		for (File file : new File(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH)).listFiles()) {
+			langs.put(file.getName().replace(".lang", ""), new Lang(file.toPath()));
 		}
 	}
 
@@ -84,14 +95,14 @@ public class Lang {
 			ep = getMethod("getHandle", p.getClass()).invoke(p, (Object[]) null);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
-			return "en_US";
+			return "en_us";
 		}
 		Field f;
 		try {
 			f = ep.getClass().getDeclaredField("locale");
 		} catch (NoSuchFieldException | SecurityException e1) {
 			e1.printStackTrace();
-			return "en_US";
+			return "en_us";
 		}
 		f.setAccessible(true);
 		String language;
@@ -99,7 +110,7 @@ public class Lang {
 			language = (String) f.get(ep);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
-			return "en_US";
+			return "en_us";
 		}
 		return language;
 	}
@@ -121,5 +132,31 @@ public class Lang {
 		} else {
 			return "INVALID LANG";
 		}
+	}
+
+	public static String getLanguage(CommandSender sender) {
+		return sender instanceof Player ? getLanguage((Player) sender)
+				: Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG);
+	}
+
+	public static String get(Player player, String name) {
+		return get(getLanguage(player), name);
+	}
+
+	public static String get(CommandSender sender, String name) {
+		return get(getLanguage(sender), name);
+	}
+
+	public static String get(String lang, String name, Object[] params) {
+		return langs.get(lang) instanceof Lang ? ((Lang) langs.get(lang)).get(name, params)
+				: get((String) langs.get(lang), name, params);
+	}
+
+	public static String get(Player player, String name, Object[] params) {
+		return get(getLanguage(player), name, params);
+	}
+
+	public static String get(CommandSender sender, String name, Object[] params) {
+		return get(getLanguage(sender), name, params);
 	}
 }

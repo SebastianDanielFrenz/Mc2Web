@@ -53,8 +53,8 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 	}
 
 	public static void permissionDenied(CommandSender sender, String[] perms) {
-		sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_PERMISSION_DENIED) + " "
-				+ Mc2Web.lang.get(Mc2Web.lERROR_PERMISSIONS_NEEDED));
+		sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lERROR_PERMISSION_DENIED) + " "
+				+ Lang.get(sender, Mc2Web.lERROR_PERMISSIONS_NEEDED));
 		for (String perm : perms) {
 			sender.sendMessage(prefix + " - §e" + perm);
 		}
@@ -79,11 +79,11 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 				if (hasPermission(sender, permission_start)) {
 					try {
 						Mc2Web.startWebServer();
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STARTED));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lMSG_SERVER_STARTED));
 					} catch (IOException e) {
 						e.printStackTrace();
 
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_INTERNAL));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lERROR_INTERNAL));
 
 						StringWriter sw = new StringWriter();
 						PrintWriter pw = new PrintWriter(sw);
@@ -99,40 +99,40 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 						}
 
 					} catch (WebServerAlreadyRunningException e) {
-						sender.sendMessage(Mc2Web.lang.get(Mc2Web.lERROR_WEB_SERVER_ALREADY_RUNNING));
+						sender.sendMessage(Lang.get(sender, Mc2Web.lERROR_WEB_SERVER_ALREADY_RUNNING));
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("stop")) {
 				if (hasPermission(sender, permission_stop)) {
 					try {
 						Mc2Web.stopWebServer();
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STOPPED));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lMSG_SERVER_STOPPED));
 					} catch (WebServerNotRunningException e) {
-						sender.sendMessage(Mc2Web.lang.get(Mc2Web.lERROR_WEB_SERVER_NOT_RUNNING));
+						sender.sendMessage(Lang.get(sender, Mc2Web.lERROR_WEB_SERVER_NOT_RUNNING));
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("restart")) {
 				if (hasPermission(sender, permission_restart)) {
 					try {
 						Mc2Web.stopWebServer();
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STOPPED));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lMSG_SERVER_STOPPED));
 					} catch (WebServerNotRunningException e) {
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_WEB_SERVER_NOT_RUNNING));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lERROR_WEB_SERVER_NOT_RUNNING));
 					}
 					try {
 						Mc2Web.startWebServer();
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STARTED));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lMSG_SERVER_STARTED));
 					} catch (IOException | WebServerAlreadyRunningException e) {
 						e.printStackTrace();
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_INTERNAL) + ": "
-								+ Mc2Web.lang.get(Mc2Web.lERROR_START_FAILED));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lERROR_INTERNAL) + ": "
+								+ Lang.get(sender, Mc2Web.lERROR_START_FAILED));
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("reload")) {
 				if (hasPermission(sender, permission_reload)) {
 					Mc2Web.plugin.reloadConfig();
 					try {
-						Mc2Web.lang = new Lang(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG), "Mc2Web");
+						Lang.registerLangs();
 					} catch (IOException e1) {
 						e1.printStackTrace();
 
@@ -146,22 +146,31 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 							e.printStackTrace();
 						}
 
-						Mc2Web.copyLangFiles(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH));
+						Mc2Web.copyLangFiles();
 					}
 
 					try {
 						Mc2Web.stopWebServer();
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STOPPED));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lMSG_SERVER_STOPPED));
 					} catch (WebServerNotRunningException e) {
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_WEB_SERVER_NOT_RUNNING));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lERROR_WEB_SERVER_NOT_RUNNING));
 					}
 					try {
 						Mc2Web.startWebServer();
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_SERVER_STARTED));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lMSG_SERVER_STARTED));
 					} catch (IOException | WebServerAlreadyRunningException e) {
 						e.printStackTrace();
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_INTERNAL) + ": "
-								+ Mc2Web.lang.get(Mc2Web.lERROR_START_FAILED));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lERROR_INTERNAL) + ": "
+								+ Lang.get(sender, Mc2Web.lERROR_START_FAILED));
+					}
+
+					if (!Files.isDirectory(Paths.get(Mc2Web.plugin.getConfig().getString(Mc2Web.cWEB_PATH)))) {
+						try {
+							Files.createDirectories(Paths.get(Mc2Web.plugin.getConfig().getString(Mc2Web.cWEB_PATH)));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						Mc2Web.copyWebFiles();
 					}
 
 					sender.sendMessage(prefix + "Config reloaded!");
@@ -172,12 +181,12 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 						if (args.length >= 2) {
 							Player player = (Player) sender;
 							Mc2Web.registerUser(player.getName(), args[1], player.getUniqueId());
-							sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lMSG_REGISTERED));
+							sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lMSG_REGISTERED));
 						} else {
-							sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_NOT_ENOUGH_ARGUMENTS));
+							sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lERROR_NOT_ENOUGH_ARGUMENTS));
 						}
 					} else {
-						sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_NOT_A_PLAYER));
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lERROR_NOT_A_PLAYER));
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("dump")) {
@@ -193,9 +202,9 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 					}
 				}
 			} else if (args[0].equalsIgnoreCase("lang")) {
-				sender.sendMessage(Lang.getLanguage((Player) sender));
+				sender.sendMessage(Lang.getLanguage(sender));
 			} else {
-				sender.sendMessage(prefix + Mc2Web.lang.get(Mc2Web.lERROR_COMMAND_NOT_FOUND));
+				sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lERROR_COMMAND_NOT_FOUND));
 			}
 		}
 
