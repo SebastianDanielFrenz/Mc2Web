@@ -26,6 +26,7 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 	public static final String[] permission_reload = { "Mc2Web.reload" };
 	public static final String[] permission_register = { "Mc2Web.register", "Mc2Web.user" };
 	public static final String[] permission_dump = { "Mc2Web.dump" };
+	public static final String[] permission_lang = { "Mc2Web.lang" };
 
 	public static final String prefix = "§f[§eMc2Web§f]: §a";
 
@@ -173,7 +174,7 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 						Mc2Web.copyWebFiles();
 					}
 
-					sender.sendMessage(prefix + "Config reloaded!");
+					sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lMSG_RELOADED));
 				}
 			} else if (args[0].equalsIgnoreCase("register")) {
 				if (hasPermission(sender, permission_register)) {
@@ -196,7 +197,7 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 						Mc2Web.dbh.getDataBase("Mc2Web").getTable("users").ToQueryResult()
 								.DumpHTMLandFormat("plugins/Mc2Web/web/users.html");
 
-						sender.sendMessage(prefix + "§aDone!");
+						sender.sendMessage(prefix + Lang.get(sender, Mc2Web.lMSG_DONE));
 					} catch (FileNotFoundException e) {
 						e.printStackTrace();
 					}

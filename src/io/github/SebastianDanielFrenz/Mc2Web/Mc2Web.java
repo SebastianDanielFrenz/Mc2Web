@@ -273,9 +273,13 @@ public class Mc2Web extends JavaPlugin {
 	public static final String lERROR_COMMAND_NOT_FOUND = "error.command_not_found";
 	public static final String lERROR_NOT_A_PLAYER = "error.not_a_player";
 	public static final String lERROR_NOT_ENOUGH_ARGUMENTS = "error.not_enough_arguments";
+
 	public static final String lMSG_SERVER_STARTED = "msg.server_started";
 	public static final String lMSG_SERVER_STOPPED = "msg.server_stopped";
 	public static final String lMSG_REGISTERED = "msg.registered";
+	public static final String lMSG_RELOADED = "msg.reloaded";
+	public static final String lMSG_DONE = "msg.done";
+
 	public static final String lWEB_ERROR_FILE_NOT_FOUND_TITLE = "web.error.file_not_found.title";
 	public static final String lWEB_ERROR_FILE_NOT_FOUND_HEADING = "web.error.file_not_found.heading";
 	public static final String lWEB_MSG_CMD_SETCOOKIE = "web.msg.cmd.setcookie";
