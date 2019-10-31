@@ -329,7 +329,7 @@ public class Mc2Web extends JavaPlugin {
 		try {
 			Files.createDirectories(Paths.get(plugin.getConfig().getString(cWEB_PATH)));
 
-			Utils.exportFiles("/res/web", plugin.getConfig().getString(cWEB_PATH));
+			Utils.exportFiles("/res/web/", plugin.getConfig().getString(cWEB_PATH));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (URISyntaxException e) {
@@ -341,7 +341,7 @@ public class Mc2Web extends JavaPlugin {
 		try {
 			Files.createDirectories(Paths.get(plugin.getConfig().getString(cLANG_PATH)));
 
-			Utils.exportFiles("/res/lang", plugin.getConfig().getString(cLANG_PATH));
+			Utils.exportFiles("/res/lang/", plugin.getConfig().getString(cLANG_PATH));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (URISyntaxException e) {

@@ -1,12 +1,16 @@
 package io.github.SebastianDanielFrenz.Mc2Web;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
@@ -177,16 +181,43 @@ public class Utils {
 		stream.close();
 	}
 
+	/**
+	 * This code is a slightly adopted version of SQL.injection's answer on
+	 * <a href=
+	 * "https://stackoverflow.com/questions/11012819/how-can-i-get-a-resource-folder-from-inside-my-jar-file/20073154">this
+	 * post on StackOverflow</a>.
+	 * 
+	 * @param src
+	 * @param dst
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 */
 	public static void exportFiles(String src, String dst) throws URISyntaxException, IOException {
-		URL url = Mc2Web.class.getResource(src);
-		if (url == null) {
-			throw new FileNotFoundException("Could not find " + src + " inside jar!");
-		} else {
-			File dir = new File(url.toURI());
-			for (File file : dir.listFiles()) {
-				Files.copy(Mc2Web.class.getResourceAsStream(src + "/" + file.getName()),
-						Paths.get(dst + "/" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
-			}
+		ClassLoader classLoader = Mc2Web.class.getClassLoader();
+
+		URI uri;
+
+		try {
+			uri = classLoader.getResource(src).toURI();
+		} catch (NullPointerException e) {
+			throw new FileNotFoundException("Dir " + src + " inside jar not found!");
+		}
+
+		if (uri == null) {
+			throw new FileNotFoundException("§4Mc2Web failed to extract the folder " + src + " to " + dst
+					+ ", because it could not find the resource!");
+		}
+
+		URL jar = Mc2Web.class.getProtectionDomain().getCodeSource().getLocation();
+		// jar.toString() begins with file:
+		// i want to trim it out...
+		Path jarFile = Paths.get(jar.toString().substring("file:".length()));
+		FileSystem fs = FileSystems.newFileSystem(jarFile, null);
+		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(fs.getPath(src));
+		for (Path p : directoryStream) {
+			InputStream is = Mc2Web.class.getResourceAsStream(p.toString());
+			// From here on completely custom code
+			Files.copy(is, Paths.get(dst + p.toFile().getName()), StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 

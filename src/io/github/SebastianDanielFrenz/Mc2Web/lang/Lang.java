@@ -1,6 +1,7 @@
 package io.github.SebastianDanielFrenz.Mc2Web.lang;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -86,8 +87,12 @@ public class Lang {
 	}
 
 	public static void registerLangs() throws IOException {
-		for (File file : new File(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH)).listFiles()) {
-			langs.put(file.getName().replace(".lang", ""), new Lang(file.toPath()));
+		try {
+			for (File file : new File(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH)).listFiles()) {
+				langs.put(file.getName().replace(".lang", ""), new Lang(file.toPath()));
+			}
+		} catch (NullPointerException e) {
+			throw new FileNotFoundException("Could not list contents of the language folder because it did not exist!");
 		}
 	}
 
