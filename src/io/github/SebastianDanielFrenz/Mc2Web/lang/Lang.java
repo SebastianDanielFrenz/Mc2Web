@@ -21,6 +21,13 @@ public class Lang {
 
 	private HashMap<String, String> map;
 
+	public static void initLangsMap() {
+		String _langs = "af_za ar_sa ast_es az_az ba_ru be_by bg_bg br_fr brb bs_BA ca_es cs_cz cy_gb da_dk de_at de_ch de_de el_gr en_au en_ca en_gb en_nz en_pt en_ud en_us enp en_ws eo_uy es_ar es_CL es_es es_mx es_uy es_ve et_ee eu_es fa_ir fi_fi fil_ph fo_fo fr_ca fr_fr vmf_de fy_nl ga_le gd_gb gl_es got gv_im haw he_il hi_in hr_hr hu_hu hy_am id_id ig_ng io_en is_is it_it ja_jp jbo kab_dz kn_in ko_kr ksh_de kw_gb la_va lb_lu li_li lol_aa lt_lt lv_lv mi_nz mk_mk mn_mn moh_us ms_my mt_mt nds_de nl_be nl_nl nn_no no_no nb_no nuk oc_fr oj_ca ovd_se pl_pl pt_br pt_pt qya_aa ro_ro ru_ru sme sk_sk sl_si so_so sr_sp sv_se swg sxu szl ta_IN th_th tlh_aa tr_tr tzl_tzl uk_ua ca-val_es vec_it vi_vn yi_de yo_ng zh_cn zh_tw";
+		for (String lang : _langs.split(" ")) {
+			langs.put(lang, "en_us");
+		}
+	}
+
 	public HashMap<String, String> getMap() {
 		return map;
 	}
