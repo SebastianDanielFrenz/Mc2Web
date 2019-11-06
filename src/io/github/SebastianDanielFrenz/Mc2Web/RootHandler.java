@@ -93,13 +93,15 @@ public class RootHandler implements HttpHandler {
 			if (cookieArgs.size() > 0) {
 				if (cookieArgs.get(0).startsWith("token=")) {
 					cookieID = cookieArgs.get(0).split("[=]")[1];
+					cookie = CookieStorage.getCookie(cookieID);
+					if (cookie == null) {
+						cookie = new Cookie("NULL");
+					}
 				} else {
 					cookieID = null;
-				}
-				cookie = CookieStorage.getCookie(cookieID);
-				if (cookie == null) {
 					cookie = new Cookie("NULL");
 				}
+
 				he.getResponseHeaders().set("Set-Cookie", "token=" + String.valueOf(cookieID));
 			} else {
 				cookieID = null;
@@ -283,7 +285,9 @@ public class RootHandler implements HttpHandler {
 			}
 
 			os.close();
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			e.printStackTrace();
 		}
 
