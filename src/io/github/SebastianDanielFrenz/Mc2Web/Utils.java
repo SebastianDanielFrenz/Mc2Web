@@ -13,7 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -193,31 +196,49 @@ public class Utils {
 	 * @throws IOException
 	 */
 	public static void exportFiles(String src, String dst) throws URISyntaxException, IOException {
-		ClassLoader classLoader = Mc2Web.class.getClassLoader();
-
-		URI uri;
-
-		try {
-			uri = classLoader.getResource(src).toURI();
-		} catch (NullPointerException e) {
-			throw new FileNotFoundException("Dir " + src + " inside jar not found!");
+		/*
+		 * ClassLoader classLoader = Mc2Web.class.getClassLoader();
+		 * 
+		 * URI uri;
+		 * 
+		 * try { uri = classLoader.getResource(src).toURI(); } catch
+		 * (NullPointerException e) { throw new FileNotFoundException("Dir " +
+		 * src + " inside jar not found!"); }
+		 * 
+		 * if (uri == null) { throw new
+		 * FileNotFoundException("§4Mc2Web failed to extract the folder " + src
+		 * + " to " + dst + ", because it could not find the resource!"); }
+		 * 
+		 * URL jar =
+		 * Mc2Web.class.getProtectionDomain().getCodeSource().getLocation(); //
+		 * jar.toString() begins with file: // i want to trim it out... Path
+		 * jarFile = Paths.get(jar.toString().substring("file:".length()));
+		 * FileSystem fs = FileSystems.newFileSystem(jarFile, null);
+		 * DirectoryStream<Path> directoryStream =
+		 * Files.newDirectoryStream(fs.getPath(src)); for (Path p :
+		 * directoryStream) { InputStream is =
+		 * Mc2Web.class.getResourceAsStream(p.toString()); // From here on
+		 * completely custom code Files.copy(is, Paths.get(dst +
+		 * p.toFile().getName()), StandardCopyOption.REPLACE_EXISTING); }
+		 */
+		
+		URI uri = Mc2Web.class.getResource(src).toURI();
+		Path myPath;
+		if (uri.getScheme().equals("jar")) {
+			FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
+			myPath = fileSystem.getPath(src);
+		} else {
+			myPath = Paths.get(uri);
 		}
 
-		if (uri == null) {
-			throw new FileNotFoundException("§4Mc2Web failed to extract the folder " + src + " to " + dst
-					+ ", because it could not find the resource!");
-		}
+		Stream<Path> walk = Files.walk(myPath, 1);
 
-		URL jar = Mc2Web.class.getProtectionDomain().getCodeSource().getLocation();
-		// jar.toString() begins with file:
-		// i want to trim it out...
-		Path jarFile = Paths.get(jar.toString().substring("file:".length()));
-		FileSystem fs = FileSystems.newFileSystem(jarFile, null);
-		DirectoryStream<Path> directoryStream = Files.newDirectoryStream(fs.getPath(src));
-		for (Path p : directoryStream) {
-			InputStream is = Mc2Web.class.getResourceAsStream(p.toString());
-			// From here on completely custom code
-			Files.copy(is, Paths.get(dst + p.toFile().getName()), StandardCopyOption.REPLACE_EXISTING);
+		for (Iterator<Path> it = walk.iterator(); it.hasNext();) {
+			Path path = it.next();
+
+			// custom code
+
+			Files.copy(path, Paths.get(dst + "/" + path.toFile().getName()), StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 
