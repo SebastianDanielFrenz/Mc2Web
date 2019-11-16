@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -143,6 +144,7 @@ public class Mc2WebCommandExecutor implements CommandExecutor {
 
 						try {
 							Files.createDirectories(Paths.get(Mc2Web.plugin.getConfig().getString(Mc2Web.cLANG_PATH)));
+
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
