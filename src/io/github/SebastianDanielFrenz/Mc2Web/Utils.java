@@ -1,20 +1,27 @@
 package io.github.SebastianDanielFrenz.Mc2Web;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -196,50 +203,20 @@ public class Utils {
 	 * @throws IOException
 	 */
 	public static void exportFiles(String src, String dst) throws URISyntaxException, IOException {
-		/*
-		 * ClassLoader classLoader = Mc2Web.class.getClassLoader();
-		 * 
-		 * URI uri;
-		 * 
-		 * try { uri = classLoader.getResource(src).toURI(); } catch
-		 * (NullPointerException e) { throw new FileNotFoundException("Dir " +
-		 * src + " inside jar not found!"); }
-		 * 
-		 * if (uri == null) { throw new
-		 * FileNotFoundException("§4Mc2Web failed to extract the folder " + src
-		 * + " to " + dst + ", because it could not find the resource!"); }
-		 * 
-		 * URL jar =
-		 * Mc2Web.class.getProtectionDomain().getCodeSource().getLocation(); //
-		 * jar.toString() begins with file: // i want to trim it out... Path
-		 * jarFile = Paths.get(jar.toString().substring("file:".length()));
-		 * FileSystem fs = FileSystems.newFileSystem(jarFile, null);
-		 * DirectoryStream<Path> directoryStream =
-		 * Files.newDirectoryStream(fs.getPath(src)); for (Path p :
-		 * directoryStream) { InputStream is =
-		 * Mc2Web.class.getResourceAsStream(p.toString()); // From here on
-		 * completely custom code Files.copy(is, Paths.get(dst +
-		 * p.toFile().getName()), StandardCopyOption.REPLACE_EXISTING); }
-		 */
+
+		InputStream summary = Mc2Web.class.getResourceAsStream(src + "summary.ini");
+		BufferedReader br = new BufferedReader(new InputStreamReader(summary));
+		String file;
 		
-		URI uri = Mc2Web.class.getResource(src).toURI();
-		Path myPath;
-		if (uri.getScheme().equals("jar")) {
-			FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
-			myPath = fileSystem.getPath(src);
-		} else {
-			myPath = Paths.get(uri);
+		while (br.ready()) {
+			file = br.readLine().replace("\n", "");
+			try {
+				exportFile(src + file, dst + file);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-
-		Stream<Path> walk = Files.walk(myPath, 1);
-
-		for (Iterator<Path> it = walk.iterator(); it.hasNext();) {
-			Path path = it.next();
-
-			// custom code
-
-			Files.copy(path, Paths.get(dst + "/" + path.toFile().getName()), StandardCopyOption.REPLACE_EXISTING);
-		}
+		br.close();
 	}
 
 }
