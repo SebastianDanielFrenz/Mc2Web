@@ -204,13 +204,20 @@ public class Utils {
 	 */
 	public static void exportFiles(String src, String dst) throws URISyntaxException, IOException {
 
+		if (!src.startsWith("/")) {
+			src = "/" + src;
+		}
+		if (!src.endsWith("/")) {
+			src = src + "/";
+		}
 		InputStream summary = Mc2Web.class.getResourceAsStream(src + "summary.ini");
 		BufferedReader br = new BufferedReader(new InputStreamReader(summary));
 		String file;
-		
+
 		while (br.ready()) {
 			file = br.readLine().replace("\n", "");
 			try {
+				Mc2Web.plugin.getLogger().info("Copying " + src + file);
 				exportFile(src + file, dst + file);
 			} catch (Exception e) {
 				e.printStackTrace();
